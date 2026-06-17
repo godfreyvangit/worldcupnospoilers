@@ -17,6 +17,7 @@ def is_highlight(title):
 def extract_teams(title):
     first_part = title.split("|")[0].strip()
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
+    first_part = re.sub(r"\s+[Hh]ighlights\s*$", "", first_part).strip()
 
     m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
     if not m:

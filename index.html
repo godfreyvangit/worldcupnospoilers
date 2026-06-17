@@ -147,8 +147,6 @@
             border-bottom: 1px solid #1e1e1e;
         }
 
-        .modal-title { font-size: 14px; color: #ccc; }
-
         .modal-close {
             background: none;
             border: none;
@@ -196,7 +194,6 @@
 <div class="modal-overlay" id="modal">
     <div class="modal-box">
         <div class="modal-header">
-            <span class="modal-title" id="modal-title"></span>
             <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         </div>
         <div class="video-wrap">
@@ -274,8 +271,7 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    function openModal(videoId, title) {
-        document.getElementById('modal-title').textContent = title;
+    function openModal(videoId) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
     }
@@ -318,7 +314,7 @@
                 byDate[date].forEach(m => {
                     const channel = m.channel.toLowerCase().includes('itv') ? 'itv' : 'bbc';
                     html += `
-                        <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1} vs ${m.team2}')">
+                        <div class="match-card" onclick="openModal('${m.videoId}')">
                             <div class="flags">
                                 <span>${getFlag(m.team1)}</span>
                                 <span>${getFlag(m.team2)}</span>
