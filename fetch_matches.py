@@ -29,6 +29,7 @@ def fetch_page(api_key, page_token=None):
     params = {
         "part": "snippet",
         "channelId": BBC_CHANNEL_ID,
+        "q": "2026 FIFA World Cup Highlights",
         "maxResults": "50",
         "order": "date",
         "type": "video",
