@@ -7,8 +7,7 @@ import sys
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-MAX_VIDEOS = 500
-EARLIEST_DATE = "20260608"  # stop processing videos older than this
+EARLIEST_DATE = "20260608"
 
 
 def is_highlight(title):
@@ -41,7 +40,7 @@ def fetch_bbc_videos():
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--playlist-end", str(MAX_VIDEOS),
+        "--extractor-args", "youtubetab:approximate_date",
         BBC_CHANNEL_URL,
     ]
 
