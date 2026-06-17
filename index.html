@@ -307,7 +307,7 @@
                 byDate[m.date].push(m);
             });
 
-            const sorted = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+            const sorted = Object.keys(byDate).sort((a, b) => new Date(b) - new Date(a));
 
             let html = '';
             sorted.forEach(date => {
