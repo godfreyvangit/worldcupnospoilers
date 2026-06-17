@@ -174,8 +174,7 @@
             border-radius: 0 0 10px 10px;
         }
 
-        .video-wrap::after {
-            content: '';
+        .title-cover {
             position: absolute;
             top: 0;
             left: 0;
@@ -183,12 +182,12 @@
             height: 60px;
             background: #000;
             pointer-events: none;
-            z-index: 1;
+            z-index: 9999;
             opacity: 0;
             transition: opacity 0.5s;
         }
 
-        .video-wrap.overlay-active::after {
+        .title-cover.active {
             opacity: 1;
         }
 
@@ -215,6 +214,7 @@
             <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         </div>
         <div class="video-wrap">
+            <div class="title-cover" id="title-cover"></div>
             <iframe id="modal-iframe" allowfullscreen></iframe>
         </div>
     </div>
@@ -294,17 +294,17 @@
     function openModal(videoId) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
-        const wrap = document.querySelector('.video-wrap');
-        wrap.classList.add('overlay-active');
+        const cover = document.getElementById('title-cover');
+        cover.classList.add('active');
         clearTimeout(overlayTimer);
-        overlayTimer = setTimeout(() => wrap.classList.remove('overlay-active'), 4000);
+        overlayTimer = setTimeout(() => cover.classList.remove('active'), 4000);
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('modal-iframe').src = '';
         clearTimeout(overlayTimer);
-        document.querySelector('.video-wrap').classList.remove('overlay-active');
+        document.getElementById('title-cover').classList.remove('active');
     }
 
     document.getElementById('modal').addEventListener('click', function(e) {
