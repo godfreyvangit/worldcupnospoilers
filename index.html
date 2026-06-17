@@ -17,6 +17,9 @@
         header {
             padding: 2rem 1.5rem 1rem;
             border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         header h1 {
@@ -34,6 +37,22 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
+
+        .kofi-btn {
+            display: inline-block;
+            background: #ff5e5b;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .kofi-btn:hover { background: #e04f4c; }
 
         main {
             max-width: 1200px;
@@ -108,7 +127,7 @@
         }
 
         .channel-itv { background: #1a0a2e; color: #9b59b6; }
-        .channel-bbc { background: #0a1a2e; color: #3498db; }
+        .channel-bbc { background: #000; color: #FFD700; }
 
         .empty-state {
             color: #333;
@@ -180,9 +199,14 @@
             left: 0;
             right: 0;
             height: 40px;
-            background: #000;
+            background: #2d7a2d;
             pointer-events: none;
             z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 20px;
         }
 
         @media (max-width: 600px) {
@@ -194,8 +218,11 @@
 <body>
 
 <header>
-    <h1>No Spoilers World Cup</h1>
-    <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
+    <div>
+        <h1>No Spoilers World Cup</h1>
+        <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
+    </div>
+    <a class="kofi-btn" href="https://ko-fi.com" target="_blank">☕ Support on Ko-fi</a>
 </header>
 
 <main id="main">
@@ -283,9 +310,11 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    function openModal(videoId) {
+    function openModal(videoId, team1, team2) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
+        document.getElementById('title-cover').innerHTML =
+            `<span>${getFlag(team1)}</span><span>${getFlag(team2)}</span>`;
     }
 
     function closeModal() {
@@ -326,7 +355,7 @@
                 byDate[date].forEach(m => {
                     const channel = m.channel.toLowerCase().includes('itv') ? 'itv' : 'bbc';
                     html += `
-                        <div class="match-card" onclick="openModal('${m.videoId}')">
+                        <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1}', '${m.team2}')">
                             <div class="flags">
                                 <span>${getFlag(m.team1)}</span>
                                 <span>${getFlag(m.team2)}</span>
@@ -349,6 +378,7 @@
     }
 
     loadMatches();
+    setTimeout(() => location.reload(), 45 * 60 * 1000);
 </script>
 
 </body>
