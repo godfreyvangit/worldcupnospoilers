@@ -38,6 +38,7 @@ def fetch_bbc_videos():
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
+        "--geo-bypass-country", "GB",
         "--extractor-args", "youtubetab:approximate_date",
         BBC_CHANNEL_URL,
     ]
