@@ -4,11 +4,10 @@ import subprocess
 import sys
 
 
-SEARCHES = [
-    ("BBC Football", "2026 FIFA World Cup Highlights BBC Football"),
-]
+BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
+BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-MAX_RESULTS = 50
+SEARCH_FROM_DATE = "20260608"  # 8th June 2026
 
 
 def is_highlight(title):
@@ -24,11 +23,11 @@ def extract_teams(title):
     first_part = title.split("|")[0].strip()
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
 
-    match = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
-    if not match:
+    m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
+    if not m:
         return None, None
 
-    return match.group(1).strip(), match.group(2).strip()
+    return m.group(1).strip(), m.group(2).strip()
 
 
 def parse_upload_date(date_str):
@@ -37,21 +36,22 @@ def parse_upload_date(date_str):
     return None
 
 
-def search_videos(channel_name, query):
-    print(f"\nSearching for {channel_name} highlights...\n")
+def fetch_bbc_videos():
+    print(f"Fetching BBC Football channel (videos since {SEARCH_FROM_DATE})...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        f"ytsearch{MAX_RESULTS}:{query}",
+        "--dateafter", SEARCH_FROM_DATE,
+        BBC_CHANNEL_URL,
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"ERROR searching {channel_name}: {result.stderr[:500]}")
+        print(f"ERROR: {result.stderr[:500]}")
         return []
 
     videos = []
@@ -67,11 +67,15 @@ def search_videos(channel_name, query):
         title = item.get("title", "")
         video_id = item.get("id", "")
         upload_date = parse_upload_date(item.get("upload_date", ""))
+        duration = item.get("duration") or 0
+
+        if duration <= 60:
+            continue  # skip Shorts
 
         print(f"TITLE: {title}")
 
         if not is_highlight(title):
-            print("SKIPPED: not a World Cup highlight")
+            print("SKIPPED")
             print("---")
             continue
 
@@ -90,7 +94,7 @@ def search_videos(channel_name, query):
             "team1": team1,
             "team2": team2,
             "date": upload_date,
-            "channel": channel_name,
+            "channel": "BBC Football",
         })
         print(f"ADDED (date: {upload_date})")
         print("---")
@@ -99,24 +103,23 @@ def search_videos(channel_name, query):
 
 
 def main():
-    all_matches = []
+    videos = fetch_bbc_videos()
+
     seen = set()
+    matches = []
+    for v in videos:
+        key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
+        if key not in seen:
+            seen.add(key)
+            matches.append(v)
 
-    for channel_name, query in SEARCHES:
-        videos = search_videos(channel_name, query)
-        for v in videos:
-            key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
-            if key not in seen:
-                seen.add(key)
-                all_matches.append(v)
-
-    all_matches.sort(key=lambda x: x["date"] or "", reverse=True)
+    matches.sort(key=lambda x: x["date"] or "", reverse=True)
 
     with open("matches.json", "w") as f:
-        json.dump(all_matches, f, indent=2)
+        json.dump(matches, f, indent=2)
 
     print("\n===================================")
-    print(f"Written {len(all_matches)} matches")
+    print(f"Written {len(matches)} matches")
     print("Output saved to matches.json")
     print("===================================\n")
 
