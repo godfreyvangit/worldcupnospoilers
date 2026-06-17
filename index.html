@@ -183,12 +183,6 @@
             background: #000;
             pointer-events: none;
             z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .title-cover.active {
-            opacity: 1;
         }
 
         @media (max-width: 600px) {
@@ -289,34 +283,15 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    let overlayTimer = null;
-
-    function showCover() {
-        clearTimeout(overlayTimer);
-        document.getElementById('title-cover').classList.add('active');
-    }
-
-    function hideCoverSoon() {
-        clearTimeout(overlayTimer);
-        overlayTimer = setTimeout(() => document.getElementById('title-cover').classList.remove('active'), 800);
-    }
-
     function openModal(videoId) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
-        showCover();
-        overlayTimer = setTimeout(() => document.getElementById('title-cover').classList.remove('active'), 4000);
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('modal-iframe').src = '';
-        clearTimeout(overlayTimer);
-        document.getElementById('title-cover').classList.remove('active');
     }
-
-    document.querySelector('.video-wrap').addEventListener('mouseenter', showCover);
-    document.querySelector('.video-wrap').addEventListener('mouseleave', hideCoverSoon);
 
     document.getElementById('modal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
