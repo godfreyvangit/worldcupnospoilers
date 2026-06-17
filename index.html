@@ -185,10 +185,10 @@
             pointer-events: none;
             z-index: 1;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.5s;
         }
 
-        .video-wrap:hover::after {
+        .video-wrap.overlay-active::after {
             opacity: 1;
         }
 
@@ -289,14 +289,22 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
+    let overlayTimer = null;
+
     function openModal(videoId) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
+        const wrap = document.querySelector('.video-wrap');
+        wrap.classList.add('overlay-active');
+        clearTimeout(overlayTimer);
+        overlayTimer = setTimeout(() => wrap.classList.remove('overlay-active'), 4000);
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('modal-iframe').src = '';
+        clearTimeout(overlayTimer);
+        document.querySelector('.video-wrap').classList.remove('overlay-active');
     }
 
     document.getElementById('modal').addEventListener('click', function(e) {
