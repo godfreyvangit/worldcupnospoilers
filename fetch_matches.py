@@ -23,7 +23,9 @@ def extract_teams(title):
     if not m:
         return None, None
 
-    return m.group(1).strip(), m.group(2).strip()
+    team1 = re.sub(r"\s+\d+\s+\w[\w\s]*$", "", m.group(1), flags=re.IGNORECASE).strip()
+    team2 = re.sub(r"\s+\d+\s+\w[\w\s]*$", "", m.group(2), flags=re.IGNORECASE).strip()
+    return team1, team2
 
 
 def search_page(api_key, page_token=None):
