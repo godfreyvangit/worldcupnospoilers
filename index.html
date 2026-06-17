@@ -184,6 +184,12 @@
             background: #000;
             pointer-events: none;
             z-index: 1;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .video-wrap:hover::after {
+            opacity: 1;
         }
 
         @media (max-width: 600px) {
