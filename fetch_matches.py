@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 API_KEY = os.environ["YOUTUBE_API_KEY"]
 
 CHANNELS = {
-    "BBC Football": "UCnJ1r80tMKnWlPS99TMICdg",
+    "BBC Football": "UCli0KmmXMDjcgqvsheHfv-Q",
 }
 
 WORLD_CUP_KEYWORDS = ["world cup 2026", "fifa world cup", "worldcup2026", "fifaworldcup"]
