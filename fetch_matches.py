@@ -9,98 +9,137 @@ CHANNELS = {
     "BBC Football": "UCli0KmmXMDjcgqvsheHfv-Q",
 }
 
-WORLD_CUP_KEYWORDS = ["world cup 2026", "fifa world cup", "worldcup2026", "fifaworldcup"]
+SEARCH_QUERY = "2026 FIFA World Cup Highlights"
 
-TEAM_NAMES = [
-    "england", "scotland", "france", "germany", "spain", "portugal",
-    "netherlands", "belgium", "croatia", "austria", "norway", "sweden",
-    "switzerland", "czechia", "turkey", "türkiye", "bosnia and herzegovina",
-    "brazil", "argentina", "colombia", "ecuador", "uruguay", "paraguay",
-    "mexico", "usa", "united states", "canada", "panama", "haiti",
-    "curaçao", "curacao",
-    "japan", "south korea", "korea republic", "australia", "iran", "ir iran",
-    "iraq", "saudi arabia", "jordan", "qatar", "uzbekistan",
-    "morocco", "senegal", "ghana", "egypt", "algeria", "tunisia",
-    "south africa", "côte d'ivoire", "ivory coast", "congo dr", "dr congo",
-    "cabo verde", "cape verde", "new zealand"
-]
-
-def extract_teams(title):
-    title_lower = title.lower()
-    found = []
-    for t in TEAM_NAMES:
-        if t in title_lower and t not in found:
-            found.append(t)
-    if len(found) >= 2:
-        return found[0].title(), found[1].title()
-    parts = re.split(r'\bv\b|\bvs\.?\b', title, flags=re.IGNORECASE)
-    if len(parts) >= 2:
-        t1 = parts[0].strip().split("|")[-1].strip()
-        t2 = parts[1].strip().split("|")[0].strip()
-        return t1, t2
-    return None, None
 
 def is_highlight(title):
-    title_lower = title.lower()
-    is_wc = any(kw in title_lower for kw in WORLD_CUP_KEYWORDS)
-    has_highlight = "highlight" in title_lower
-    return is_wc and has_highlight
+    return "2026 fifa world cup highlights" in title.lower()
+
+
+def extract_teams(title):
+    """
+    Example:
+
+    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! |
+    2026 FIFA World Cup Highlights | Group G
+
+    Returns:
+    ("Iraq", "Norway")
+    """
+
+    first_part = title.split("|")[0].strip()
+
+    match = re.match(
+        r"^(.+?)\s+\d+\-\d+\s+(.+?)(?:\s+[^\w\s].*)?$",
+        first_part
+    )
+
+    if not match:
+        return None, None
+
+    team1 = match.group(1).strip()
+    team2 = match.group(2).strip()
+
+    return team1, team2
+
 
 def fetch_channel_videos(youtube, channel_id, channel_name):
     results = []
-    request = youtube.search().list(
+
+    print(f"\nSearching {channel_name}...\n")
+
+    response = youtube.search().list(
         part="snippet",
         channelId=channel_id,
         maxResults=50,
         order="date",
         type="video",
-        q="World Cup 2026 highlights"
-    )
-    response = request.execute()
+        q=SEARCH_QUERY,
+    ).execute()
+
+    print(f"YouTube returned {len(response.get('items', []))} videos\n")
 
     for item in response.get("items", []):
+
         title = item["snippet"]["title"]
+
+        print("TITLE:", title)
+
         if not is_highlight(title):
+            print("SKIPPED: Not a World Cup highlight")
+            print("---")
             continue
 
         team1, team2 = extract_teams(title)
+
+        print("TEAM1:", team1)
+        print("TEAM2:", team2)
+
         if not team1 or not team2:
+            print("FAILED TEAM EXTRACTION")
+            print("---")
             continue
 
-        published = item["snippet"]["publishedAt"][:10]
-        video_id = item["id"]["videoId"]
+        results.append(
+            {
+                "videoId": item["id"]["videoId"],
+                "title": title,
+                "team1": team1,
+                "team2": team2,
+                "date": item["snippet"]["publishedAt"][:10],
+                "channel": channel_name,
+            }
+        )
 
-        results.append({
-            "videoId": video_id,
-            "title": title,
-            "team1": team1,
-            "team2": team2,
-            "date": published,
-            "channel": channel_name
-        })
+        print("ADDED")
+        print("---")
 
     return results
 
+
 def main():
-    youtube = build("youtube", "v3", developerKey=API_KEY)
+    youtube = build(
+        "youtube",
+        "v3",
+        developerKey=API_KEY,
+    )
 
     all_matches = []
     seen = set()
 
     for channel_name, channel_id in CHANNELS.items():
-        videos = fetch_channel_videos(youtube, channel_id, channel_name)
-        for v in videos:
-            key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
+
+        videos = fetch_channel_videos(
+            youtube,
+            channel_id,
+            channel_name,
+        )
+
+        for video in videos:
+
+            key = (
+                f"{video['team1'].lower()}_"
+                f"{video['team2'].lower()}_"
+                f"{video['date']}"
+            )
+
             if key not in seen:
                 seen.add(key)
-                all_matches.append(v)
+                all_matches.append(video)
 
-    all_matches.sort(key=lambda x: x["date"])
+    all_matches.sort(
+        key=lambda x: x["date"],
+        reverse=True,
+    )
 
     with open("matches.json", "w") as f:
         json.dump(all_matches, f, indent=2)
 
-    print(f"Written {len(all_matches)} matches to matches.json")
+    print("\n===================================")
+    print(f"Written {len(all_matches)} matches")
+    print("Output saved to matches.json")
+    print("===================================\n")
+
 
 if __name__ == "__main__":
     main()
