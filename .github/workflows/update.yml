@@ -15,10 +15,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install yt-dlp
-
       - name: Fetch matches
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python fetch_matches.py
 
       - name: Commit if changed
