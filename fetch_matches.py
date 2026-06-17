@@ -33,6 +33,7 @@ def search_page(api_key, page_token=None):
         "order": "date",
         "type": "video",
         "publishedAfter": f"{EARLIEST_DATE}T00:00:00Z",
+        "regionCode": "GB",
         "key": api_key,
     }
     if page_token:
