@@ -4,12 +4,11 @@ import subprocess
 import sys
 
 
-CHANNELS = {
-    "BBC Football": "https://www.youtube.com/@BBCFootball/videos",
-    "ITV Football": "https://www.youtube.com/@ITVFootball/videos",
-}
+SEARCHES = [
+    ("BBC Football", "2026 FIFA World Cup Highlights BBC Football"),
+]
 
-MAX_VIDEOS = 50
+MAX_RESULTS = 50
 
 
 def is_highlight(title):
@@ -19,8 +18,7 @@ def is_highlight(title):
 
 def extract_teams(title):
     """
-    Example:
-    Iraq 1-4 Norway | 2026 FIFA World Cup Highlights | Group G
+    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
     Returns: ("Iraq", "Norway")
     """
     first_part = title.split("|")[0].strip()
@@ -34,28 +32,26 @@ def extract_teams(title):
 
 
 def parse_upload_date(date_str):
-    """Convert yt-dlp upload_date (YYYYMMDD) to YYYY-MM-DD."""
     if date_str and len(date_str) == 8:
         return f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
     return None
 
 
-def fetch_channel_videos(channel_name, channel_url):
-    print(f"\nFetching {channel_name}...\n")
+def search_videos(channel_name, query):
+    print(f"\nSearching for {channel_name} highlights...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--playlist-end", str(MAX_VIDEOS),
-        channel_url,
+        f"ytsearch{MAX_RESULTS}:{query}",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"ERROR fetching {channel_name}: {result.stderr[:500]}")
+        print(f"ERROR searching {channel_name}: {result.stderr[:500]}")
         return []
 
     videos = []
@@ -106,8 +102,8 @@ def main():
     all_matches = []
     seen = set()
 
-    for channel_name, channel_url in CHANNELS.items():
-        videos = fetch_channel_videos(channel_name, channel_url)
+    for channel_name, query in SEARCHES:
+        videos = search_videos(channel_name, query)
         for v in videos:
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
