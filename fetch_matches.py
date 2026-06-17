@@ -1,15 +1,12 @@
 import json
+import os
 import re
-import subprocess
-import sys
+import urllib.request
+import urllib.parse
 
 
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
-
-SEARCH_QUERIES = [
-    "2026 FIFA World Cup Highlights BBC Football Group",
-    "2026 FIFA World Cup Highlights BBC Football",
-]
+EARLIEST_DATE = "2026-06-08"
 
 
 def is_highlight(title):
@@ -28,109 +25,88 @@ def extract_teams(title):
     return m.group(1).strip(), m.group(2).strip()
 
 
-def search_youtube(query, max_results=50):
-    cmd = [
-        sys.executable, "-m", "yt_dlp",
-        "--flat-playlist",
-        "--dump-json",
-        "--no-warnings",
-        f"ytsearch{max_results}:{query}",
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"ERROR: {result.stderr[:300]}")
-        return []
+def search_page(api_key, page_token=None):
+    params = {
+        "part": "snippet",
+        "q": "2026 FIFA World Cup Highlights BBC Football",
+        "maxResults": "50",
+        "order": "date",
+        "type": "video",
+        "publishedAfter": f"{EARLIEST_DATE}T00:00:00Z",
+        "key": api_key,
+    }
+    if page_token:
+        params["pageToken"] = page_token
 
-    items = []
-    for line in result.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            items.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return items
+    url = "https://www.googleapis.com/youtube/v3/search?" + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(url) as r:
+        return json.loads(r.read())
 
 
-def fetch_video_date(video_id):
-    cmd = [
-        sys.executable, "-m", "yt_dlp",
-        "--dump-json",
-        "--no-warnings",
-        "--skip-download",
-        f"https://www.youtube.com/watch?v={video_id}",
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-    if result.returncode != 0:
-        return None
-    try:
-        data = json.loads(result.stdout)
-        d = data.get("upload_date", "")
-        if d and len(d) == 8:
-            return f"{d[:4]}-{d[4:6]}-{d[6:]}"
-    except Exception:
-        pass
-    return None
+def fetch_highlights(api_key):
+    print("Searching YouTube API for BBC World Cup highlights...\n")
 
-
-def fetch_highlights():
-    print("Searching YouTube for BBC World Cup highlights...\n")
-
-    seen_ids = set()
-    candidates = []
-
-    for query in SEARCH_QUERIES:
-        print(f"Query: {query}")
-        items = search_youtube(query)
-        for item in items:
-            video_id = item.get("id", "")
-            channel_id = item.get("channel_id", "")
-            title = item.get("title", "")
-            duration = item.get("duration") or 0
-
-            if video_id in seen_ids:
-                continue
-            if channel_id != BBC_CHANNEL_ID:
-                continue
-            if duration and duration <= 60:
-                continue
-            if not is_highlight(title):
-                continue
-
-            seen_ids.add(video_id)
-            candidates.append({"id": video_id, "title": title})
-            print(f"  FOUND: {title}")
-
-    print(f"\nFetching dates for {len(candidates)} highlights...")
     videos = []
-    for c in candidates:
-        title = c["title"]
-        video_id = c["id"]
+    page_token = None
+    pages = 0
 
-        team1, team2 = extract_teams(title)
-        print(f"\nTITLE: {title}")
-        if not team1 or not team2:
-            print("FAILED TEAM EXTRACTION")
-            continue
+    while pages < 4:
+        data = search_page(api_key, page_token)
+        pages += 1
 
-        date = fetch_video_date(video_id)
-        print(f"TEAM1: {team1}  TEAM2: {team2}  DATE: {date}")
+        for item in data.get("items", []):
+            snippet = item.get("snippet", {})
+            channel_id = snippet.get("channelId", "")
+            title = snippet.get("title", "")
+            video_id = item["id"].get("videoId", "")
+            published = snippet.get("publishedAt", "")[:10]
 
-        videos.append({
-            "videoId": video_id,
-            "title": title,
-            "team1": team1,
-            "team2": team2,
-            "date": date,
-            "channel": "BBC Football",
-        })
+            print(f"TITLE: {title}  CHANNEL: {channel_id}")
+
+            if channel_id != BBC_CHANNEL_ID:
+                print("SKIPPED (wrong channel)")
+                print("---")
+                continue
+
+            if not is_highlight(title):
+                print("SKIPPED")
+                print("---")
+                continue
+
+            team1, team2 = extract_teams(title)
+            print(f"TEAM1: {team1}")
+            print(f"TEAM2: {team2}")
+
+            if not team1 or not team2:
+                print("FAILED TEAM EXTRACTION")
+                print("---")
+                continue
+
+            videos.append({
+                "videoId": video_id,
+                "title": title,
+                "team1": team1,
+                "team2": team2,
+                "date": published,
+                "channel": "BBC Football",
+            })
+            print(f"ADDED (date: {published})")
+            print("---")
+
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
 
     return videos
 
 
 def main():
-    videos = fetch_highlights()
+    api_key = os.environ.get("YOUTUBE_API_KEY")
+    if not api_key:
+        print("ERROR: YOUTUBE_API_KEY environment variable not set")
+        return
+
+    videos = fetch_highlights(api_key)
 
     seen = set()
     matches = []
