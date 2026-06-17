@@ -291,13 +291,21 @@
 
     let overlayTimer = null;
 
+    function showCover() {
+        clearTimeout(overlayTimer);
+        document.getElementById('title-cover').classList.add('active');
+    }
+
+    function hideCoverSoon() {
+        clearTimeout(overlayTimer);
+        overlayTimer = setTimeout(() => document.getElementById('title-cover').classList.remove('active'), 800);
+    }
+
     function openModal(videoId) {
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
-        const cover = document.getElementById('title-cover');
-        cover.classList.add('active');
-        clearTimeout(overlayTimer);
-        overlayTimer = setTimeout(() => cover.classList.remove('active'), 4000);
+        showCover();
+        overlayTimer = setTimeout(() => document.getElementById('title-cover').classList.remove('active'), 4000);
     }
 
     function closeModal() {
@@ -306,6 +314,9 @@
         clearTimeout(overlayTimer);
         document.getElementById('title-cover').classList.remove('active');
     }
+
+    document.querySelector('.video-wrap').addEventListener('mouseenter', showCover);
+    document.querySelector('.video-wrap').addEventListener('mouseleave', hideCoverSoon);
 
     document.getElementById('modal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
