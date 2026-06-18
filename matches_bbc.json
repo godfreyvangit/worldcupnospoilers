@@ -1,5 +1,13 @@
 [
   {
+    "videoId": "duKt7XzP8uE",
+    "title": "Czech Republic v South Africa \ud83c\udde8\ud83c\uddff\ud83c\uddff\ud83c\udde6 | 2026 FIFA World Cup | Group A",
+    "team1": "Czechia",
+    "team2": "South Africa",
+    "date": "2026-06-18",
+    "channel": "BBC Football"
+  },
+  {
     "videoId": "hlftbq8nKDI",
     "title": "Uzbekistan 1-3 Colombia Highlights \ud83c\uddfa\ud83c\uddff\ud83c\udde8\ud83c\uddf4 | 2026 FIFA World Cup | Group K",
     "team1": "Uzbekistan",
@@ -32,18 +40,18 @@
     "channel": "BBC Football"
   },
   {
-    "videoId": "PSrurQwHU70",
-    "title": "Austria 3-1 Jordan \ud83c\udde6\ud83c\uddf9 \ud83c\uddef\ud83c\uddf4 | 2026 FIFA World Cup Highlights | Group J",
-    "team1": "Austria",
-    "team2": "Jordan",
+    "videoId": "87v2GKoWqUY",
+    "title": "Messi&#39;s FIRST EVER World Cup Hat-trick  | Argentina v Algeria \ud83c\udde6\ud83c\uddf7 \ud83c\udde9\ud83c\uddff | 2026 FIFA World Cup | Group J",
+    "team1": "Argentina",
+    "team2": "Algeria",
     "date": "2026-06-17",
     "channel": "BBC Football"
   },
   {
-    "videoId": "oz0oLIyZNCY",
-    "title": "Argentina 3-0 Algeria \ud83c\udde6\ud83c\uddf7 \ud83c\udde9\ud83c\uddff | MESSI MASTERCLASS! | 2026 FIFA World Cup Highlights | Group J",
-    "team1": "Argentina",
-    "team2": "Algeria",
+    "videoId": "PSrurQwHU70",
+    "title": "Austria 3-1 Jordan \ud83c\udde6\ud83c\uddf9 \ud83c\uddef\ud83c\uddf4 | 2026 FIFA World Cup Highlights | Group J",
+    "team1": "Austria",
+    "team2": "Jordan",
     "date": "2026-06-17",
     "channel": "BBC Football"
   },
@@ -60,6 +68,14 @@
     "title": "France 3-1 Senegal Highlights \ud83c\uddeb\ud83c\uddf7\ud83c\uddf8\ud83c\uddf3 | Second-Half SHOWING | 2026 FIFA World Cup | Group I",
     "team1": "France",
     "team2": "Senegal",
+    "date": "2026-06-16",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "cAOpzqrDrA0",
+    "title": "\ud83d\ude31 CAPE VERDE SHOCK SPAIN! Guillem Balagu\u00e9 REACTS to upset | Football Daily | FIFA 2026 World Cup",
+    "team1": "Cape Verde",
+    "team2": "Spain",
     "date": "2026-06-16",
     "channel": "BBC Football"
   },
@@ -125,70 +141,6 @@
     "team1": "Germany",
     "team2": "Cura\u00e7ao",
     "date": "2026-06-14",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "2WdbfZxEZ1o",
-    "title": "Australia 2-0 Turkey Highlights \ud83c\udde6\ud83c\uddfa\ud83c\uddf9\ud83c\uddf7 | 2026 FIFA World Cup | Group D",
-    "team1": "Australia",
-    "team2": "Turkey",
-    "date": "2026-06-14",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "vUwkLY_uNiw",
-    "title": "Haiti 0-1 Scotland Highlights \ud83c\udded\ud83c\uddf9 \ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f | 2026 FIFA World Cup | Group C",
-    "team1": "Haiti",
-    "team2": "Scotland",
-    "date": "2026-06-14",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "oBklTAifI6c",
-    "title": "Brazil 1-1 Morocco Highlights \ud83c\udde7\ud83c\uddf7 \ud83c\uddf2\ud83c\udde6 | 2026 FIFA World Cup | Group C",
-    "team1": "Brazil",
-    "team2": "Morocco",
-    "date": "2026-06-14",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "hcefv-X6Z7I",
-    "title": "Qatar 1-1 Switzerland Highlights \ud83c\uddf6\ud83c\udde6\ud83c\udde8\ud83c\udded | 2026 FIFA World Cup | Group B",
-    "team1": "Qatar",
-    "team2": "Switzerland",
-    "date": "2026-06-13",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "mB-H7V6tp_o",
-    "title": "USA 4-1 Paraguay Highlights \ud83c\uddfa\ud83c\uddf8 \ud83c\uddf5\ud83c\uddfe | 2026 FIFA World Cup | Group D",
-    "team1": "USA",
-    "team2": "Paraguay",
-    "date": "2026-06-13",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "kHAAkBqYphk",
-    "title": "Canada 1-1 Bosnia-Herzegovina Highlights \ud83c\udde8\ud83c\udde6\ud83c\udde7\ud83c\udde6 | 2026 FIFA World Cup | Group B",
-    "team1": "Canada",
-    "team2": "Bosnia-Herzegovina",
-    "date": "2026-06-12",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "3sJZSVXY33Y",
-    "title": "South Korea 2-1 Czech Republic \ud83c\uddf0\ud83c\uddf7 \ud83c\udde8\ud83c\uddff | 2026 FIFA World Cup Highlights | Group A",
-    "team1": "South Korea",
-    "team2": "Czechia",
-    "date": "2026-06-12",
-    "channel": "BBC Football"
-  },
-  {
-    "videoId": "zsrZc72hbgY",
-    "title": "Mexico 2-0 South Africa \ud83c\uddf2\ud83c\uddfd\ud83c\uddff\ud83c\udde6 3 RED CARDS!! | 2026 FIFA World Cup Highlights | Group A",
-    "team1": "Mexico",
-    "team2": "South Africa",
-    "date": "2026-06-11",
     "channel": "BBC Football"
   }
 ]
