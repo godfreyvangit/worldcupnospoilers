@@ -1,11 +1,13 @@
 import json
+import os
 import re
-import subprocess
-import sys
+import urllib.request
+import urllib.parse
 
 
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
-BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
+EARLIEST_DATE = "2026-06-08"
+
 
 def is_highlight(title):
     t = title.lower()
@@ -13,10 +15,6 @@ def is_highlight(title):
 
 
 def extract_teams(title):
-    """
-    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
-    Returns: ("Iraq", "Norway")
-    """
     first_part = title.split("|")[0].strip()
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
 
@@ -27,81 +25,80 @@ def extract_teams(title):
     return m.group(1).strip(), m.group(2).strip()
 
 
-def parse_upload_date(date_str):
-    if date_str and len(date_str) == 8:
-        return f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-    return None
+def fetch_page(api_key, page_token=None):
+    params = {
+        "part": "snippet",
+        "channelId": BBC_CHANNEL_ID,
+        "maxResults": "50",
+        "order": "date",
+        "type": "video",
+        "publishedAfter": f"{EARLIEST_DATE}T00:00:00Z",
+        "key": api_key,
+    }
+    if page_token:
+        params["pageToken"] = page_token
+
+    url = "https://www.googleapis.com/youtube/v3/search?" + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(url) as r:
+        return json.loads(r.read())
 
 
-def fetch_bbc_videos():
-    print("Fetching BBC Football channel...\n")
-
-    cmd = [
-        sys.executable, "-m", "yt_dlp",
-        "--flat-playlist",
-        "--dump-json",
-        "--no-warnings",
-        "--geo-bypass-country", "GB",
-        "--extractor-args", "youtubetab:approximate_date",
-        BBC_CHANNEL_URL,
-    ]
-
-    result = subprocess.run(cmd, capture_output=True, text=True)
-
-    if result.returncode != 0:
-        print(f"ERROR: {result.stderr[:500]}")
-        return []
+def fetch_highlights(api_key):
+    print("Fetching BBC Football channel via YouTube API...\n")
 
     videos = []
-    for line in result.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            item = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    page_token = None
 
-        title = item.get("title", "")
-        video_id = item.get("id", "")
-        upload_date = item.get("upload_date", "")
-        duration = item.get("duration") or 0
+    while True:
+        data = fetch_page(api_key, page_token)
 
-        if duration <= 60:
-            continue
+        for item in data.get("items", []):
+            video_id = item["id"].get("videoId", "")
+            snippet = item.get("snippet", {})
+            title = snippet.get("title", "")
+            published = snippet.get("publishedAt", "")[:10]  # YYYY-MM-DD
 
-        print(f"TITLE: {title}")
+            print(f"TITLE: {title}")
 
-        if not is_highlight(title):
-            print("SKIPPED")
+            if not is_highlight(title):
+                print("SKIPPED")
+                print("---")
+                continue
+
+            team1, team2 = extract_teams(title)
+            print(f"TEAM1: {team1}")
+            print(f"TEAM2: {team2}")
+
+            if not team1 or not team2:
+                print("FAILED TEAM EXTRACTION")
+                print("---")
+                continue
+
+            videos.append({
+                "videoId": video_id,
+                "title": title,
+                "team1": team1,
+                "team2": team2,
+                "date": published,
+                "channel": "BBC Football",
+            })
+            print(f"ADDED (date: {published})")
             print("---")
-            continue
 
-        team1, team2 = extract_teams(title)
-        print(f"TEAM1: {team1}")
-        print(f"TEAM2: {team2}")
-
-        if not team1 or not team2:
-            print("FAILED TEAM EXTRACTION")
-            print("---")
-            continue
-
-        videos.append({
-            "videoId": video_id,
-            "title": title,
-            "team1": team1,
-            "team2": team2,
-            "date": parse_upload_date(upload_date),
-            "channel": "BBC Football",
-        })
-        print(f"ADDED (date: {upload_date})")
-        print("---")
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
 
     return videos
 
 
 def main():
-    videos = fetch_bbc_videos()
+    api_key = os.environ.get("YOUTUBE_API_KEY")
+    if not api_key:
+        print("ERROR: YOUTUBE_API_KEY environment variable not set")
+        return
+
+    videos = fetch_highlights(api_key)
 
     seen = set()
     matches = []
