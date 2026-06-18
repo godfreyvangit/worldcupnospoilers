@@ -3,6 +3,7 @@ import os
 import re
 import urllib.request
 import urllib.parse
+from datetime import date, timedelta
 
 
 # Each channel writes its own JSON file consumed by the dropdown on the homepage
@@ -10,7 +11,10 @@ CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
 ]
-EARLIEST_DATE = "2026-06-08"
+
+# Only search YouTube for videos published in the last N days.
+# Older matches are already persisted in the JSON files and won't be lost.
+LOOKBACK_DAYS = 5
 
 # The 48 qualified FIFA World Cup 2026 teams (with spelling variants)
 TEAMS = [
@@ -23,7 +27,7 @@ TEAMS = [
     "Curaçao", "Curacao", "Haiti", "Panama",
     "Argentina", "Brazil", "Colombia", "Ecuador", "Paraguay", "Uruguay",
     "New Zealand",
-    "Austria", "Belgium", "Bosnia and Herzegovina", "Croatia", "Czechia", "Czech Republic",
+    "Austria", "Belgium", "Bosnia and Herzegovina", "Bosnia-Herzegovina", "Croatia", "Czechia", "Czech Republic",
     "England", "France", "Germany", "Netherlands", "Norway", "Portugal",
     "Scotland", "Spain", "Sweden", "Switzerland", "Turkey", "Türkiye",
 ]
@@ -50,6 +54,8 @@ CANONICAL = {
     "turkey": "Turkey",
     "united states": "USA",
     "usa": "USA",
+    "bosnia-herzegovina": "Bosnia and Herzegovina",
+    "bosnia & herzegovina": "Bosnia and Herzegovina",
 }
 
 
@@ -114,14 +120,51 @@ def extract_teams(title):
     return None, None
 
 
+def match_key(team1, team2):
+    """Order-independent key for a team pair."""
+    t1 = CANONICAL.get(team1.lower(), team1).lower()
+    t2 = CANONICAL.get(team2.lower(), team2).lower()
+    return frozenset([t1, t2])
+
+
+def check_missing(matches_by_channel):
+    """Cross-reference channels: flag any match present on one but absent on another."""
+    channel_names = list(matches_by_channel.keys())
+    if len(channel_names) < 2:
+        return
+
+    sets = {
+        name: {match_key(m["team1"], m["team2"]) for m in matches}
+        for name, matches in matches_by_channel.items()
+    }
+
+    print("\n--- Cross-channel coverage check ---")
+    any_gap = False
+    for i, ch_a in enumerate(channel_names):
+        for ch_b in channel_names[i + 1:]:
+            only_a = sets[ch_a] - sets[ch_b]
+            only_b = sets[ch_b] - sets[ch_a]
+            for pair in sorted(only_a, key=str):
+                teams = " vs ".join(sorted(pair))
+                print(f"⚠️  On {ch_a} but not {ch_b}: {teams}")
+                any_gap = True
+            for pair in sorted(only_b, key=str):
+                teams = " vs ".join(sorted(pair))
+                print(f"⚠️  On {ch_b} but not {ch_a}: {teams}")
+                any_gap = True
+    if not any_gap:
+        print("✅  Both channels have the same set of matches.")
+
+
 def fetch_page(api_key, channel_id, page_token=None):
+    published_after = (date.today() - timedelta(days=LOOKBACK_DAYS)).isoformat()
     params = {
         "part": "snippet",
         "channelId": channel_id,
         "maxResults": "50",
         "order": "date",
         "type": "video",
-        "publishedAfter": f"{EARLIEST_DATE}T00:00:00Z",
+        "publishedAfter": f"{published_after}T00:00:00Z",
         "regionCode": "GB",
         "key": api_key,
     }
@@ -188,6 +231,8 @@ def main():
         print("ERROR: YOUTUBE_API_KEY environment variable not set")
         return
 
+    matches_by_channel = {}
+
     for channel in CHANNELS:
         try:
             videos = fetch_highlights(api_key, channel)
@@ -210,7 +255,7 @@ def main():
                 seen.add(key)
                 matches.append(v)
 
-        # Remove the rogue reaction video that slipped in previously
+        # Strip any non-highlight entries that slipped in from previous runs
         matches = [m for m in matches if is_highlight(m["title"])]
 
         matches.sort(key=lambda x: x["date"] or "", reverse=True)
@@ -221,6 +266,10 @@ def main():
         print("\n===================================")
         print(f"{channel['name']}: written {len(matches)} matches -> {channel['file']}")
         print("===================================\n")
+
+        matches_by_channel[channel["name"]] = matches
+
+    check_missing(matches_by_channel)
 
 
 if __name__ == "__main__":
