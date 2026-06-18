@@ -7,7 +7,7 @@ import sys
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-MAX_VIDEOS = 100
+SEARCH_FROM_DATE = "20260608"  # 8th June 2026
 
 
 def is_highlight(title):
@@ -37,14 +37,14 @@ def parse_upload_date(date_str):
 
 
 def fetch_bbc_videos():
-    print(f"Fetching BBC Football channel (up to {MAX_VIDEOS} videos)...\n")
+    print(f"Fetching BBC Football channel (videos since {SEARCH_FROM_DATE})...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--playlist-end", str(MAX_VIDEOS),
+        "--dateafter", SEARCH_FROM_DATE,
         BBC_CHANNEL_URL,
     ]
 
