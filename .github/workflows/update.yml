@@ -2,7 +2,10 @@ name: Update matches
 
 on:
   schedule:
-   - cron: '0 * * * *'
+    - cron: '30 21 * * *'
+    - cron: '30 23 * * *'
+    - cron: '30 1 * * *'
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
