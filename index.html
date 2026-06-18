@@ -229,7 +229,7 @@
         }
 
         .video-wrap iframe,
-        .video-wrap #player {
+        .video-wrap #player-container {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -263,7 +263,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
-        /* Opaque cover hides the thumbnail until the video is actually PLAYING */
+        /* Opaque cover hides the thumbnail until the user clicks play */
         .video-cover {
             position: absolute;
             inset: 0;
@@ -273,24 +273,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.3s;
+            cursor: pointer;
         }
 
         .video-cover.hidden {
-            opacity: 0;
-            pointer-events: none;
+            display: none;
         }
 
-        .spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid #333;
-            border-top-color: #fff;
+        .play-btn {
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            background: rgba(255,255,255,0.15);
+            border: 3px solid rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .play-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .play-btn svg { width: 32px; height: 32px; fill: #fff; margin-left: 4px; }
 
         @media (max-width: 600px) {
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
@@ -328,16 +332,17 @@
             <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         </div>
         <div class="video-wrap">
-            <div id="player"></div>
+            <div id="player-container"></div>
             <div class="title-bar" id="title-bar"></div>
-            <div class="video-cover" id="video-cover">
-                <div class="spinner"></div>
+            <div class="video-cover" id="video-cover" onclick="startVideo()">
+                <div class="play-btn">
+                    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const FLAGS = {
         "england": "gb-eng", "scotland": "gb-sct", "france": "fr", "germany": "de",
@@ -368,53 +373,33 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    // ---- YouTube IFrame API ----
-    let player = null;
-    let playerReady = false;
-    let pendingVideoId = null;
+    let currentVideoId = null;
 
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            width: '100%',
-            height: '100%',
-            playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
-            events: {
-                onReady: () => {
-                    playerReady = true;
-                    if (pendingVideoId) {
-                        player.loadVideoById(pendingVideoId);
-                        pendingVideoId = null;
-                    }
-                },
-                onStateChange: (e) => {
-                    // 1 = PLAYING: only now reveal the video
-                    if (e.data === YT.PlayerState.PLAYING) {
-                        document.getElementById('video-cover').classList.add('hidden');
-                    }
-                }
-            }
-        });
+    function startVideo() {
+        if (!currentVideoId) return;
+        document.getElementById('video-cover').classList.add('hidden');
+        document.getElementById('player-container').innerHTML =
+            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1"
+                allow="autoplay; encrypted-media" allowfullscreen
+                style="position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:0 0 10px 10px;">
+            </iframe>`;
     }
 
     function openModal(videoId, team1, team2) {
-        // Always show the cover before anything loads
+        currentVideoId = videoId;
+        document.getElementById('player-container').innerHTML = '';
         document.getElementById('video-cover').classList.remove('hidden');
         const flagsHtml = getFlag(team1) + getFlag(team2);
         document.getElementById('modal-flags').innerHTML = flagsHtml;
         document.getElementById('title-bar').innerHTML = flagsHtml;
         document.getElementById('modal').classList.add('open');
-
-        if (playerReady) {
-            player.loadVideoById(videoId);  // autoplays
-        } else {
-            pendingVideoId = videoId;       // play as soon as API is ready
-        }
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('video-cover').classList.remove('hidden');
-        if (playerReady) player.stopVideo();
+        document.getElementById('player-container').innerHTML = '';
+        currentVideoId = null;
     }
 
     document.getElementById('modal').addEventListener('click', function(e) {
