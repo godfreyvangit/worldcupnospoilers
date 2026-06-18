@@ -8,26 +8,27 @@ import urllib.parse
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 EARLIEST_DATE = "2026-06-08"
 
-# All 48 FIFA World Cup 2026 teams
+# The 48 qualified FIFA World Cup 2026 teams (with spelling variants)
 TEAMS = [
-    "Argentina", "Australia", "Austria", "Belgium", "Bolivia", "Bosnia and Herzegovina",
-    "Brazil", "Canada", "Cape Verde", "Chile", "Colombia", "Costa Rica",
-    "Croatia", "Curaçao", "Curacao", "Czechia", "Czech Republic",
-    "DR Congo", "Democratic Republic of Congo",
-    "Ecuador", "Egypt", "England", "France", "Germany", "Ghana", "Greece",
-    "Haiti", "Honduras", "Hungary",
-    "Indonesia", "Iran", "Iraq", "Ivory Coast", "Cote d'Ivoire",
-    "Japan", "Jordan", "Kenya",
-    "Mali", "Mexico", "Montenegro", "Morocco",
-    "Netherlands", "New Zealand", "Nigeria", "North Korea", "Norway",
-    "Panama", "Paraguay", "Peru", "Poland", "Portugal",
-    "Qatar",
-    "Romania",
-    "Saudi Arabia", "Scotland", "Senegal", "Serbia", "Slovakia", "Slovenia",
-    "South Africa", "South Korea", "Republic of Korea", "Spain", "Sweden", "Switzerland",
-    "Thailand", "Tunisia", "Turkey",
-    "Ukraine", "United States", "USA", "Uruguay", "Uzbekistan",
-    "Venezuela",
+    # Hosts
+    "Canada", "Mexico", "United States", "USA",
+    # AFC (Asia)
+    "Australia", "Iraq", "Iran", "Japan", "Jordan",
+    "South Korea", "Republic of Korea", "Qatar", "Saudi Arabia", "Uzbekistan",
+    # CAF (Africa)
+    "Algeria", "Cape Verde", "Cabo Verde", "DR Congo", "Congo DR", "Democratic Republic of Congo",
+    "Ivory Coast", "Cote d'Ivoire", "Egypt", "Ghana", "Morocco",
+    "Senegal", "South Africa", "Tunisia",
+    # CONCACAF
+    "Curaçao", "Curacao", "Haiti", "Panama",
+    # CONMEBOL (South America)
+    "Argentina", "Brazil", "Colombia", "Ecuador", "Paraguay", "Uruguay",
+    # OFC
+    "New Zealand",
+    # UEFA (Europe)
+    "Austria", "Belgium", "Bosnia and Herzegovina", "Croatia", "Czechia", "Czech Republic",
+    "England", "France", "Germany", "Netherlands", "Norway", "Portugal",
+    "Scotland", "Spain", "Sweden", "Switzerland", "Turkey", "Türkiye",
 ]
 
 # Canonical names for display (normalize variants)
@@ -36,12 +37,17 @@ CANONICAL = {
     "curaçao": "Curaçao",
     "czech republic": "Czechia",
     "czechia": "Czechia",
+    "cabo verde": "Cape Verde",
+    "cape verde": "Cape Verde",
+    "congo dr": "DR Congo",
     "democratic republic of congo": "DR Congo",
     "dr congo": "DR Congo",
     "cote d'ivoire": "Ivory Coast",
     "ivory coast": "Ivory Coast",
     "republic of korea": "South Korea",
     "south korea": "South Korea",
+    "türkiye": "Turkey",
+    "turkey": "Turkey",
     "united states": "USA",
     "usa": "USA",
 }
