@@ -4,51 +4,33 @@ import subprocess
 import sys
 
 
-CHANNELS = {
-    "BBC Football": "https://www.youtube.com/@BBCFootball/videos",
-    "ITV Football": "https://www.youtube.com/@ITVFootball/videos",
-}
+SEARCHES = [
+    ("BBC Football", "2026 FIFA World Cup Highlights BBC Football"),
+    ("ITV Football", "2026 FIFA World Cup Highlights ITV"),
+]
 
-MAX_VIDEOS = 50
-
-# All 48 World Cup 2026 nations — sorted longest-first so multi-word names match before substrings
-WC_TEAMS = sorted([
-    "Bosnia and Herzegovina", "Saudi Arabia", "South Korea", "South Africa",
-    "New Zealand", "Ivory Coast", "Cape Verde", "Cabo Verde", "Costa Rica",
-    "United States", "Korea Republic", "IR Iran", "DR Congo", "Congo DR",
-    "Côte d'Ivoire", "Trinidad and Tobago",
-    "Argentina", "Australia", "Belgium", "Brazil", "Cameroon", "Canada",
-    "Colombia", "Croatia", "Czechia", "Ecuador", "England", "France",
-    "Germany", "Ghana", "Hungary", "Iran", "Iraq", "Jamaica", "Japan",
-    "Jordan", "Mexico", "Morocco", "Netherlands", "Nigeria", "Norway",
-    "Panama", "Paraguay", "Peru", "Poland", "Portugal", "Qatar",
-    "Romania", "Scotland", "Senegal", "Serbia", "Slovenia", "Spain",
-    "Sweden", "Switzerland", "Tunisia", "Turkey", "Türkiye",
-    "Ukraine", "Uruguay", "USA", "Uzbekistan", "Venezuela",
-    "Wales", "Algeria", "Egypt", "Cuba", "Haiti", "Curacao", "Curaçao",
-], key=len, reverse=True)
+MAX_RESULTS = 50
 
 
-def is_wc_video(title):
+def is_highlight(title):
     t = title.lower()
-    # BBC uses "FIFA 2026 World Cup", ITV may use "2026 FIFA World Cup"
-    is_wc = "fifa 2026 world cup" in t or "2026 fifa world cup" in t
-    # BBC posts "Football Daily" roundups; others may say "highlights"
-    is_match = "football daily" in t or "highlight" in t
-    return is_wc and is_match
+    return "2026 fifa world cup" in t and "highlight" in t
 
 
 def extract_teams(title):
-    found = []
-    title_lower = title.lower()
-    for team in WC_TEAMS:
-        if team.lower() in title_lower:
-            found.append(team)
-        if len(found) == 2:
-            break
-    if len(found) >= 2:
-        return found[0], found[1]
-    return None, None
+    """
+    Example:
+    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
+    Returns: ("Iraq", "Norway")
+    """
+    first_part = title.split("|")[0].strip()
+    first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
+
+    match = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
+    if not match:
+        return None, None
+
+    return match.group(1).strip(), match.group(2).strip()
 
 
 def parse_upload_date(date_str):
@@ -58,22 +40,21 @@ def parse_upload_date(date_str):
     return None
 
 
-def fetch_channel_videos(channel_name, channel_url):
-    print(f"\nFetching {channel_name}...\n")
+def search_videos(channel_name, query):
+    print(f"\nSearching for {channel_name} highlights...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--playlist-end", str(MAX_VIDEOS),
-        channel_url,
+        f"ytsearch{MAX_RESULTS}:{query}",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"ERROR fetching {channel_name}: {result.stderr[:500]}")
+        print(f"ERROR searching {channel_name}: {result.stderr[:500]}")
         return []
 
     videos = []
@@ -92,8 +73,8 @@ def fetch_channel_videos(channel_name, channel_url):
 
         print(f"TITLE: {title}")
 
-        if not is_wc_video(title):
-            print("SKIPPED: not a World Cup match video")
+        if not is_highlight(title):
+            print("SKIPPED: not a World Cup highlight")
             print("---")
             continue
 
@@ -124,8 +105,8 @@ def main():
     all_matches = []
     seen = set()
 
-    for channel_name, channel_url in CHANNELS.items():
-        videos = fetch_channel_videos(channel_name, channel_url)
+    for channel_name, query in SEARCHES:
+        videos = search_videos(channel_name, query)
         for v in videos:
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
