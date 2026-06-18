@@ -54,17 +54,22 @@ def is_highlight(title):
 
 def extract_teams(title):
     title_lower = title.lower()
-    found = []
-    # Sort by length desc so "South Korea" matches before "Korea"
+    # Find each team and where it appears. Sort candidates by length desc so
+    # longer names ("South Korea") win over substrings ("Korea") at the same spot.
+    hits = {}  # canonical -> earliest position
     for team in sorted(TEAMS, key=len, reverse=True):
-        if team.lower() in title_lower:
-            canonical = CANONICAL.get(team.lower(), team)
-            if canonical not in found:
-                found.append(canonical)
-        if len(found) == 2:
-            break
-    if len(found) >= 2:
-        return found[0], found[1]
+        pos = title_lower.find(team.lower())
+        if pos == -1:
+            continue
+        canonical = CANONICAL.get(team.lower(), team)
+        # Skip if this match overlaps a longer name already found at this spot
+        if canonical in hits:
+            continue
+        hits[canonical] = pos
+    # Order teams by their position in the title (team1 appears first)
+    ordered = sorted(hits, key=lambda c: hits[c])
+    if len(ordered) >= 2:
+        return ordered[0], ordered[1]
 
     # Fallback: regex-based extraction
     first_part = title.split("|")[0].strip()
