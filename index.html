@@ -9,14 +9,18 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            background: #1a4a2e;
             color: #fff;
             min-height: 100vh;
         }
 
         header {
             padding: 2rem 1.5rem 1rem;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid #2a6a42;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #143d25;
         }
 
         header h1 {
@@ -29,11 +33,27 @@
 
         header p {
             font-size: 11px;
-            color: #555;
+            color: #6aaa82;
             margin-top: 4px;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
+
+        .kofi-btn {
+            display: inline-block;
+            background: #ff5e5b;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .kofi-btn:hover { background: #e04f4c; }
 
         main {
             max-width: 1200px;
@@ -44,14 +64,16 @@
         .date-section { margin-bottom: 3rem; }
 
         .date-label {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #444;
+            color: #fff;
+            background: #0f6b35;
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 4px;
             margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #1a1a1a;
         }
 
         .matches-grid {
@@ -61,8 +83,8 @@
         }
 
         .match-card {
-            background: #111;
-            border: 1px solid #1e1e1e;
+            background: #143d25;
+            border: 1px solid #2a6a42;
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
@@ -70,8 +92,8 @@
         }
 
         .match-card:hover {
-            border-color: #333;
-            background: #161616;
+            border-color: #4a9a62;
+            background: #1a4a2e;
         }
 
         .flags {
@@ -80,19 +102,25 @@
             justify-content: center;
             gap: 10px;
             padding: 1.5rem 1rem;
-            font-size: 44px;
-            background: #0f0f0f;
+            background: #0f2d1c;
+        }
+
+        .flags img {
+            width: 48px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 3px;
         }
 
         .match-info {
             padding: 10px 12px;
-            border-top: 1px solid #1a1a1a;
+            border-top: 1px solid #2a6a42;
             text-align: center;
         }
 
         .match-teams {
             font-size: 12px;
-            color: #888;
+            color: #a0d0b0;
             line-height: 1.5;
         }
 
@@ -108,10 +136,10 @@
         }
 
         .channel-itv { background: #1a0a2e; color: #9b59b6; }
-        .channel-bbc { background: #0a1a2e; color: #3498db; }
+        .channel-bbc { background: #000; color: #FFD700; }
 
         .empty-state {
-            color: #333;
+            color: #4a7a5a;
             font-size: 13px;
             text-align: center;
             padding: 4rem;
@@ -147,7 +175,18 @@
             border-bottom: 1px solid #1e1e1e;
         }
 
-        .modal-title { font-size: 14px; color: #ccc; }
+        .modal-title-flags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-title-flags img {
+            width: 32px;
+            height: 24px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
 
         .modal-close {
             background: none;
@@ -167,7 +206,8 @@
             height: 0;
         }
 
-        .video-wrap iframe {
+        .video-wrap iframe,
+        .video-wrap #player {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -176,17 +216,77 @@
             border-radius: 0 0 10px 10px;
         }
 
+        /* Green bar covering the YouTube title at the top of the video */
+        .title-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #0f6b35;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            border-radius: 0;
+        }
+
+        .title-bar img {
+            width: 40px;
+            height: 30px;
+            object-fit: cover;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        /* Opaque cover hides the thumbnail until the video is actually PLAYING */
+        .video-cover {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            z-index: 10;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s;
+        }
+
+        .video-cover.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #333;
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 600px) {
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .flags { font-size: 36px; padding: 1.2rem 0.8rem; }
+            .flags { padding: 1.2rem 0.8rem; }
+            .flags img { width: 40px; height: 30px; }
+            .title-bar { height: 44px; gap: 10px; }
+            .title-bar img { width: 32px; height: 24px; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>No Spoilers World Cup</h1>
-    <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
+    <div>
+        <h1>No Spoilers World Cup</h1>
+        <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
+    </div>
+    <a class="kofi-btn" href="https://ko-fi.com" target="_blank">&#9749; Support on Ko-fi</a>
 </header>
 
 <main id="main">
@@ -196,77 +296,43 @@
 <div class="modal-overlay" id="modal">
     <div class="modal-box">
         <div class="modal-header">
-            <span class="modal-title" id="modal-title"></span>
+            <div class="modal-title-flags" id="modal-flags"></div>
             <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         </div>
         <div class="video-wrap">
-            <iframe id="modal-iframe" allowfullscreen></iframe>
+            <div id="player"></div>
+            <div class="title-bar" id="title-bar"></div>
+            <div class="video-cover" id="video-cover">
+                <div class="spinner"></div>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const FLAGS = {
-        "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-        "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-        "france": "🇫🇷",
-        "germany": "🇩🇪",
-        "spain": "🇪🇸",
-        "portugal": "🇵🇹",
-        "netherlands": "🇳🇱",
-        "belgium": "🇧🇪",
-        "croatia": "🇭🇷",
-        "austria": "🇦🇹",
-        "norway": "🇳🇴",
-        "sweden": "🇸🇪",
-        "switzerland": "🇨🇭",
-        "czechia": "🇨🇿",
-        "turkey": "🇹🇷",
-        "türkiye": "🇹🇷",
-        "bosnia and herzegovina": "🇧🇦",
-        "brazil": "🇧🇷",
-        "argentina": "🇦🇷",
-        "colombia": "🇨🇴",
-        "ecuador": "🇪🇨",
-        "uruguay": "🇺🇾",
-        "paraguay": "🇵🇾",
-        "mexico": "🇲🇽",
-        "usa": "🇺🇸",
-        "united states": "🇺🇸",
-        "canada": "🇨🇦",
-        "panama": "🇵🇦",
-        "haiti": "🇭🇹",
-        "curacao": "🇨🇼",
-        "curaçao": "🇨🇼",
-        "japan": "🇯🇵",
-        "south korea": "🇰🇷",
-        "korea republic": "🇰🇷",
-        "australia": "🇦🇺",
-        "iran": "🇮🇷",
-        "ir iran": "🇮🇷",
-        "iraq": "🇮🇶",
-        "saudi arabia": "🇸🇦",
-        "jordan": "🇯🇴",
-        "qatar": "🇶🇦",
-        "uzbekistan": "🇺🇿",
-        "morocco": "🇲🇦",
-        "senegal": "🇸🇳",
-        "ghana": "🇬🇭",
-        "egypt": "🇪🇬",
-        "algeria": "🇩🇿",
-        "tunisia": "🇹🇳",
-        "south africa": "🇿🇦",
-        "côte d'ivoire": "🇨🇮",
-        "ivory coast": "🇨🇮",
-        "congo dr": "🇨🇩",
-        "dr congo": "🇨🇩",
-        "cabo verde": "🇨🇻",
-        "cape verde": "🇨🇻",
-        "new zealand": "🇳🇿"
+        "england": "gb-eng", "scotland": "gb-sct", "france": "fr", "germany": "de",
+        "spain": "es", "portugal": "pt", "netherlands": "nl", "belgium": "be",
+        "croatia": "hr", "austria": "at", "norway": "no", "sweden": "se",
+        "switzerland": "ch", "czechia": "cz", "czech republic": "cz", "turkey": "tr",
+        "türkiye": "tr", "bosnia and herzegovina": "ba", "bosnia": "ba", "brazil": "br",
+        "argentina": "ar", "colombia": "co", "ecuador": "ec", "uruguay": "uy",
+        "paraguay": "py", "mexico": "mx", "usa": "us", "united states": "us",
+        "canada": "ca", "panama": "pa", "haiti": "ht", "curacao": "cw", "curaçao": "cw",
+        "japan": "jp", "south korea": "kr", "republic of korea": "kr", "australia": "au",
+        "iran": "ir", "iraq": "iq", "saudi arabia": "sa", "jordan": "jo", "qatar": "qa",
+        "uzbekistan": "uz", "morocco": "ma", "senegal": "sn", "ghana": "gh", "egypt": "eg",
+        "algeria": "dz", "tunisia": "tn", "south africa": "za", "ivory coast": "ci",
+        "côte d'ivoire": "ci", "dr congo": "cd", "congo dr": "cd", "cape verde": "cv",
+        "cabo verde": "cv", "new zealand": "nz"
     };
 
     function getFlag(name) {
-        return FLAGS[name.toLowerCase()] || "🏳";
+        const key = name.toLowerCase().trim();
+        const code = FLAGS[key];
+        if (!code) return `<span style="color:#a0d0b0;font-size:12px">${name}</span>`;
+        return `<img src="https://flagcdn.com/w80/${code}.png" alt="${name}" title="${name}">`;
     }
 
     function formatDate(dateStr) {
@@ -274,15 +340,53 @@
         return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    function openModal(videoId, title) {
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    // ---- YouTube IFrame API ----
+    let player = null;
+    let playerReady = false;
+    let pendingVideoId = null;
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            width: '100%',
+            height: '100%',
+            playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
+            events: {
+                onReady: () => {
+                    playerReady = true;
+                    if (pendingVideoId) {
+                        player.loadVideoById(pendingVideoId);
+                        pendingVideoId = null;
+                    }
+                },
+                onStateChange: (e) => {
+                    // 1 = PLAYING: only now reveal the video
+                    if (e.data === YT.PlayerState.PLAYING) {
+                        document.getElementById('video-cover').classList.add('hidden');
+                    }
+                }
+            }
+        });
+    }
+
+    function openModal(videoId, team1, team2) {
+        // Always show the cover before anything loads
+        document.getElementById('video-cover').classList.remove('hidden');
+        const flagsHtml = getFlag(team1) + getFlag(team2);
+        document.getElementById('modal-flags').innerHTML = flagsHtml;
+        document.getElementById('title-bar').innerHTML = flagsHtml;
         document.getElementById('modal').classList.add('open');
+
+        if (playerReady) {
+            player.loadVideoById(videoId);  // autoplays
+        } else {
+            pendingVideoId = videoId;       // play as soon as API is ready
+        }
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
-        document.getElementById('modal-iframe').src = '';
+        document.getElementById('video-cover').classList.remove('hidden');
+        if (playerReady) player.stopVideo();
     }
 
     document.getElementById('modal').addEventListener('click', function(e) {
@@ -293,7 +397,7 @@
 
     async function loadMatches() {
         try {
-            const res = await fetch('matches.json');
+            const res = await fetch('matches.json?t=' + Date.now());
             const matches = await res.json();
 
             if (!matches.length) {
@@ -318,10 +422,10 @@
                 byDate[date].forEach(m => {
                     const channel = m.channel.toLowerCase().includes('itv') ? 'itv' : 'bbc';
                     html += `
-                        <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1} vs ${m.team2}')">
+                        <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1}', '${m.team2}')">
                             <div class="flags">
-                                <span>${getFlag(m.team1)}</span>
-                                <span>${getFlag(m.team2)}</span>
+                                ${getFlag(m.team1)}
+                                ${getFlag(m.team2)}
                             </div>
                             <div class="match-info">
                                 <div class="match-teams">${m.team1}<br>${m.team2}</div>
@@ -341,6 +445,7 @@
     }
 
     loadMatches();
+    setTimeout(() => location.reload(), 45 * 60 * 1000);
 </script>
 
 </body>
