@@ -6,7 +6,6 @@ import sys
 
 SEARCHES = [
     ("BBC Football", "2026 FIFA World Cup Highlights BBC Football"),
-    ("ITV Football", "2026 FIFA World Cup Highlights ITV"),
 ]
 
 MAX_RESULTS = 50
