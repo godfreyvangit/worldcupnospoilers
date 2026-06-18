@@ -216,6 +216,31 @@
             border-radius: 0 0 10px 10px;
         }
 
+        /* Green bar covering the YouTube title at the top of the video */
+        .title-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #0f6b35;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            border-radius: 0;
+        }
+
+        .title-bar img {
+            width: 40px;
+            height: 30px;
+            object-fit: cover;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
         /* Opaque cover hides the thumbnail until the video is actually PLAYING */
         .video-cover {
             position: absolute;
@@ -249,6 +274,8 @@
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
             .flags { padding: 1.2rem 0.8rem; }
             .flags img { width: 40px; height: 30px; }
+            .title-bar { height: 44px; gap: 10px; }
+            .title-bar img { width: 32px; height: 24px; }
         }
     </style>
 </head>
@@ -274,6 +301,7 @@
         </div>
         <div class="video-wrap">
             <div id="player"></div>
+            <div class="title-bar" id="title-bar"></div>
             <div class="video-cover" id="video-cover">
                 <div class="spinner"></div>
             </div>
@@ -343,7 +371,9 @@
     function openModal(videoId, team1, team2) {
         // Always show the cover before anything loads
         document.getElementById('video-cover').classList.remove('hidden');
-        document.getElementById('modal-flags').innerHTML = getFlag(team1) + getFlag(team2);
+        const flagsHtml = getFlag(team1) + getFlag(team2);
+        document.getElementById('modal-flags').innerHTML = flagsHtml;
+        document.getElementById('title-bar').innerHTML = flagsHtml;
         document.getElementById('modal').classList.add('open');
 
         if (playerReady) {
