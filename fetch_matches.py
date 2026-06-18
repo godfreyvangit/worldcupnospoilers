@@ -11,27 +11,44 @@ CHANNELS = {
 
 MAX_VIDEOS = 50
 
+# All 48 World Cup 2026 nations — sorted longest-first so multi-word names match before substrings
+WC_TEAMS = sorted([
+    "Bosnia and Herzegovina", "Saudi Arabia", "South Korea", "South Africa",
+    "New Zealand", "Ivory Coast", "Cape Verde", "Cabo Verde", "Costa Rica",
+    "United States", "Korea Republic", "IR Iran", "DR Congo", "Congo DR",
+    "Côte d'Ivoire", "Trinidad and Tobago",
+    "Argentina", "Australia", "Belgium", "Brazil", "Cameroon", "Canada",
+    "Colombia", "Croatia", "Czechia", "Ecuador", "England", "France",
+    "Germany", "Ghana", "Hungary", "Iran", "Iraq", "Jamaica", "Japan",
+    "Jordan", "Mexico", "Morocco", "Netherlands", "Nigeria", "Norway",
+    "Panama", "Paraguay", "Peru", "Poland", "Portugal", "Qatar",
+    "Romania", "Scotland", "Senegal", "Serbia", "Slovenia", "Spain",
+    "Sweden", "Switzerland", "Tunisia", "Turkey", "Türkiye",
+    "Ukraine", "Uruguay", "USA", "Uzbekistan", "Venezuela",
+    "Wales", "Algeria", "Egypt", "Cuba", "Haiti", "Curacao", "Curaçao",
+], key=len, reverse=True)
 
-def is_highlight(title):
+
+def is_wc_video(title):
     t = title.lower()
-    return "2026 fifa world cup" in t and "highlight" in t
+    # BBC uses "FIFA 2026 World Cup", ITV may use "2026 FIFA World Cup"
+    is_wc = "fifa 2026 world cup" in t or "2026 fifa world cup" in t
+    # BBC posts "Football Daily" roundups; others may say "highlights"
+    is_match = "football daily" in t or "highlight" in t
+    return is_wc and is_match
 
 
 def extract_teams(title):
-    """
-    Example:
-    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
-    Returns: ("Iraq", "Norway")
-    """
-    first_part = title.split("|")[0].strip()
-    # Strip trailing emoji/non-ASCII symbols
-    first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
-
-    match = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
-    if not match:
-        return None, None
-
-    return match.group(1).strip(), match.group(2).strip()
+    found = []
+    title_lower = title.lower()
+    for team in WC_TEAMS:
+        if team.lower() in title_lower:
+            found.append(team)
+        if len(found) == 2:
+            break
+    if len(found) >= 2:
+        return found[0], found[1]
+    return None, None
 
 
 def parse_upload_date(date_str):
@@ -75,8 +92,8 @@ def fetch_channel_videos(channel_name, channel_url):
 
         print(f"TITLE: {title}")
 
-        if not is_highlight(title):
-            print("SKIPPED: not a World Cup highlight")
+        if not is_wc_video(title):
+            print("SKIPPED: not a World Cup match video")
             print("---")
             continue
 
