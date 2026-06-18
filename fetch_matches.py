@@ -8,38 +8,39 @@ import urllib.parse
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 EARLIEST_DATE = "2026-06-08"
 
+# The 48 qualified FIFA World Cup 2026 teams (with spelling variants)
 TEAMS = [
-    "Argentina", "Australia", "Austria", "Belgium", "Bolivia", "Bosnia and Herzegovina",
-    "Brazil", "Canada", "Cape Verde", "Chile", "Colombia", "Costa Rica",
-    "Croatia", "Curaçao", "Curacao", "Czechia", "Czech Republic",
-    "DR Congo", "Democratic Republic of Congo",
-    "Ecuador", "Egypt", "England", "France", "Germany", "Ghana", "Greece",
-    "Haiti", "Honduras", "Hungary",
-    "Indonesia", "Iran", "Iraq", "Ivory Coast", "Cote d'Ivoire",
-    "Japan", "Jordan", "Kenya",
-    "Mali", "Mexico", "Montenegro", "Morocco",
-    "Netherlands", "New Zealand", "Nigeria", "North Korea", "Norway",
-    "Panama", "Paraguay", "Peru", "Poland", "Portugal",
-    "Qatar",
-    "Romania",
-    "Saudi Arabia", "Scotland", "Senegal", "Serbia", "Slovakia", "Slovenia",
-    "South Africa", "South Korea", "Republic of Korea", "Spain", "Sweden", "Switzerland",
-    "Thailand", "Tunisia", "Turkey",
-    "Ukraine", "United States", "USA", "Uruguay", "Uzbekistan",
-    "Venezuela",
+    "Canada", "Mexico", "United States", "USA",
+    "Australia", "Iraq", "Iran", "Japan", "Jordan",
+    "South Korea", "Republic of Korea", "Qatar", "Saudi Arabia", "Uzbekistan",
+    "Algeria", "Cape Verde", "Cabo Verde", "DR Congo", "Congo DR", "Democratic Republic of Congo",
+    "Ivory Coast", "Cote d'Ivoire", "Egypt", "Ghana", "Morocco",
+    "Senegal", "South Africa", "Tunisia",
+    "Curaçao", "Curacao", "Haiti", "Panama",
+    "Argentina", "Brazil", "Colombia", "Ecuador", "Paraguay", "Uruguay",
+    "New Zealand",
+    "Austria", "Belgium", "Bosnia and Herzegovina", "Croatia", "Czechia", "Czech Republic",
+    "England", "France", "Germany", "Netherlands", "Norway", "Portugal",
+    "Scotland", "Spain", "Sweden", "Switzerland", "Turkey", "Türkiye",
 ]
 
+# Canonical names for display (normalize variants)
 CANONICAL = {
     "curacao": "Curaçao",
     "curaçao": "Curaçao",
     "czech republic": "Czechia",
     "czechia": "Czechia",
+    "cabo verde": "Cape Verde",
+    "cape verde": "Cape Verde",
+    "congo dr": "DR Congo",
     "democratic republic of congo": "DR Congo",
     "dr congo": "DR Congo",
     "cote d'ivoire": "Ivory Coast",
     "ivory coast": "Ivory Coast",
     "republic of korea": "South Korea",
     "south korea": "South Korea",
+    "türkiye": "Turkey",
+    "turkey": "Turkey",
     "united states": "USA",
     "usa": "USA",
 }
@@ -51,27 +52,31 @@ def is_highlight(title):
 
 
 def extract_teams(title):
+    # Match against the known team list (handles any title format)
     title_lower = title.lower()
-    found = []
+    hits = {}  # canonical -> position in title
     for team in sorted(TEAMS, key=len, reverse=True):
-        if team.lower() in title_lower:
-            canonical = CANONICAL.get(team.lower(), team)
-            if canonical not in found:
-                found.append(canonical)
-        if len(found) == 2:
-            break
-    if len(found) >= 2:
-        return found[0], found[1]
+        pos = title_lower.find(team.lower())
+        if pos == -1:
+            continue
+        canonical = CANONICAL.get(team.lower(), team)
+        if canonical not in hits:
+            hits[canonical] = pos
+    ordered = sorted(hits, key=lambda c: hits[c])
+    if len(ordered) >= 2:
+        return ordered[0], ordered[1]
 
     # Fallback: regex-based extraction
     first_part = title.split("|")[0].strip()
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
     first_part = re.sub(r"\s+[Hh]ighlights\s*$", "", first_part).strip()
 
+    # "Team1 1-4 Team2" format
     m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
     if m:
         return m.group(1).strip(), m.group(2).strip()
 
+    # "Team1 v Team2" format
     m = re.match(r"^(.+?)\s+v\s+(.+?)$", first_part)
     if m:
         return m.group(1).strip(), m.group(2).strip()
@@ -110,7 +115,7 @@ def fetch_highlights(api_key):
             video_id = item["id"].get("videoId", "")
             snippet = item.get("snippet", {})
             title = snippet.get("title", "")
-            published = snippet.get("publishedAt", "")[:10]
+            published = snippet.get("publishedAt", "")[:10]  # YYYY-MM-DD
 
             print(f"TITLE: {title}")
 
