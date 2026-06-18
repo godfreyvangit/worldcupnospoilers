@@ -159,7 +159,6 @@
 
         .channel-itv { background: #1a0a2e; color: #9b59b6; }
         .channel-bbc { background: #000; color: #FFD700; }
-        .channel-fifa { background: #002b5c; color: #ffffff; }
 
         .empty-state {
             color: #4a7a5a;
@@ -313,7 +312,6 @@
         <select class="channel-select" id="channel-select" onchange="changeChannel(this.value)">
             <option value="matches_bbc.json">BBC Football</option>
             <option value="matches_itv.json">ITV Sport</option>
-            <option value="matches_fifa.json">FIFA</option>
         </select>
         <a class="kofi-btn" href="https://ko-fi.com" target="_blank">&#9749; Support on Ko-fi</a>
     </div>
@@ -430,7 +428,6 @@
     function channelClass(name) {
         const n = name.toLowerCase();
         if (n.includes('itv')) return 'itv';
-        if (n.includes('fifa')) return 'fifa';
         return 'bbc';
     }
 
