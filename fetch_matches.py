@@ -5,7 +5,12 @@ import urllib.request
 import urllib.parse
 
 
-BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
+# Each channel writes its own JSON file consumed by the dropdown on the homepage
+CHANNELS = [
+    {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
+    {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
+    {"id": "UCpcTrCXblq78GZrTUTLWeBw", "name": "FIFA", "file": "matches_fifa.json"},
+]
 EARLIEST_DATE = "2026-06-08"
 
 # The 48 qualified FIFA World Cup 2026 teams (with spelling variants)
@@ -46,9 +51,20 @@ CANONICAL = {
 }
 
 
+# Compilations / previews are not single-match highlights and would be mislabelled
+EXCLUDE_KEYWORDS = [
+    "preview", "compilation", "top 10", "top ten", "best goals",
+    "every goal", "all goals", "review", "reaction", "press conference",
+]
+
+
 def is_highlight(title):
     t = title.lower()
-    return "2026 fifa world cup" in t and "highlight" in t
+    # Channels vary the word order: BBC "2026 FIFA World Cup",
+    # FIFA "FIFA World Cup 2026". Match on the stable parts.
+    if "world cup" not in t or "2026" not in t or "highlight" not in t:
+        return False
+    return not any(kw in t for kw in EXCLUDE_KEYWORDS)
 
 
 def extract_teams(title):
@@ -84,10 +100,10 @@ def extract_teams(title):
     return None, None
 
 
-def fetch_page(api_key, page_token=None):
+def fetch_page(api_key, channel_id, page_token=None):
     params = {
         "part": "snippet",
-        "channelId": BBC_CHANNEL_ID,
+        "channelId": channel_id,
         "maxResults": "50",
         "order": "date",
         "type": "video",
@@ -103,14 +119,14 @@ def fetch_page(api_key, page_token=None):
         return json.loads(r.read())
 
 
-def fetch_highlights(api_key):
-    print("Fetching BBC Football channel via YouTube API...\n")
+def fetch_highlights(api_key, channel):
+    print(f"Fetching {channel['name']} channel via YouTube API...\n")
 
     videos = []
     page_token = None
 
     while True:
-        data = fetch_page(api_key, page_token)
+        data = fetch_page(api_key, channel["id"], page_token)
 
         for item in data.get("items", []):
             video_id = item["id"].get("videoId", "")
@@ -140,7 +156,7 @@ def fetch_highlights(api_key):
                 "team1": team1,
                 "team2": team2,
                 "date": published,
-                "channel": "BBC Football",
+                "channel": channel["name"],
             })
             print(f"ADDED (date: {published})")
             print("---")
@@ -158,25 +174,30 @@ def main():
         print("ERROR: YOUTUBE_API_KEY environment variable not set")
         return
 
-    videos = fetch_highlights(api_key)
+    for channel in CHANNELS:
+        try:
+            videos = fetch_highlights(api_key, channel)
+        except Exception as e:
+            # Don't let one channel failing wipe the others; keep existing file
+            print(f"ERROR fetching {channel['name']}: {e}")
+            continue
 
-    seen = set()
-    matches = []
-    for v in videos:
-        key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
-        if key not in seen:
-            seen.add(key)
-            matches.append(v)
+        seen = set()
+        matches = []
+        for v in videos:
+            key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
+            if key not in seen:
+                seen.add(key)
+                matches.append(v)
 
-    matches.sort(key=lambda x: x["date"] or "", reverse=True)
+        matches.sort(key=lambda x: x["date"] or "", reverse=True)
 
-    with open("matches.json", "w") as f:
-        json.dump(matches, f, indent=2)
+        with open(channel["file"], "w") as f:
+            json.dump(matches, f, indent=2)
 
-    print("\n===================================")
-    print(f"Written {len(matches)} matches")
-    print("Output saved to matches.json")
-    print("===================================\n")
+        print("\n===================================")
+        print(f"{channel['name']}: written {len(matches)} matches -> {channel['file']}")
+        print("===================================\n")
 
 
 if __name__ == "__main__":

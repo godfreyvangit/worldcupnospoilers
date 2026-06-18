@@ -55,6 +55,28 @@
 
         .kofi-btn:hover { background: #e04f4c; }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .channel-select {
+            background: #0f6b35;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid #2a6a42;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .channel-select:focus { outline: none; border-color: #4a9a62; }
+
         main {
             max-width: 1200px;
             margin: 0 auto;
@@ -137,6 +159,7 @@
 
         .channel-itv { background: #1a0a2e; color: #9b59b6; }
         .channel-bbc { background: #000; color: #FFD700; }
+        .channel-fifa { background: #002b5c; color: #ffffff; }
 
         .empty-state {
             color: #4a7a5a;
@@ -286,7 +309,14 @@
         <h1>No Spoilers World Cup</h1>
         <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
     </div>
-    <a class="kofi-btn" href="https://ko-fi.com" target="_blank">&#9749; Support on Ko-fi</a>
+    <div class="header-controls">
+        <select class="channel-select" id="channel-select" onchange="changeChannel(this.value)">
+            <option value="matches_bbc.json">BBC Football</option>
+            <option value="matches_itv.json">ITV Sport</option>
+            <option value="matches_fifa.json">FIFA</option>
+        </select>
+        <a class="kofi-btn" href="https://ko-fi.com" target="_blank">&#9749; Support on Ko-fi</a>
+    </div>
 </header>
 
 <main id="main">
@@ -395,13 +425,29 @@
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+    let currentChannelFile = 'matches_bbc.json';
+
+    function channelClass(name) {
+        const n = name.toLowerCase();
+        if (n.includes('itv')) return 'itv';
+        if (n.includes('fifa')) return 'fifa';
+        return 'bbc';
+    }
+
+    function changeChannel(file) {
+        currentChannelFile = file;
+        document.getElementById('main').innerHTML = '<div class="empty-state">Loading matches...</div>';
+        loadMatches();
+    }
+
     async function loadMatches() {
+        const main = document.getElementById('main');
         try {
-            const res = await fetch('matches.json?t=' + Date.now());
+            const res = await fetch(currentChannelFile + '?t=' + Date.now());
             const matches = await res.json();
 
             if (!matches.length) {
-                document.getElementById('main').innerHTML = '<div class="empty-state">No highlights yet. Check back soon.</div>';
+                main.innerHTML = '<div class="empty-state">No highlights yet. Check back soon.</div>';
                 return;
             }
 
@@ -420,7 +466,7 @@
                     <div class="matches-grid">`;
 
                 byDate[date].forEach(m => {
-                    const channel = m.channel.toLowerCase().includes('itv') ? 'itv' : 'bbc';
+                    const channel = channelClass(m.channel);
                     html += `
                         <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1}', '${m.team2}')">
                             <div class="flags">
@@ -437,10 +483,10 @@
                 html += `</div></div>`;
             });
 
-            document.getElementById('main').innerHTML = html;
+            main.innerHTML = html;
 
         } catch(e) {
-            document.getElementById('main').innerHTML = '<div class="empty-state">Could not load matches.</div>';
+            main.innerHTML = '<div class="empty-state">Could not load matches.</div>';
         }
     }
 
