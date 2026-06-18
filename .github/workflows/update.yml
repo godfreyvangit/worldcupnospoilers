@@ -2,7 +2,11 @@ name: Update matches
 
 on:
   schedule:
-   - cron: '0 * * * *'
+    # Times in UTC (UK summer time = UTC+1). Runs after typical match end times.
+    - cron: '30 21 * * *'   # 22:30 UK
+    - cron: '30 23 * * *'   # 00:30 UK
+    - cron: '30 1 * * *'    # 02:30 UK
+    - cron: '0 8 * * *'     # 09:00 UK (morning catch-up)
   workflow_dispatch:
 
 jobs:
