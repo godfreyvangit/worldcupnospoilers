@@ -9,17 +9,18 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            background: #1a4a2e;
             color: #fff;
             min-height: 100vh;
         }
 
         header {
             padding: 2rem 1.5rem 1rem;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid #2a6a42;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            background: #143d25;
         }
 
         header h1 {
@@ -32,7 +33,7 @@
 
         header p {
             font-size: 11px;
-            color: #555;
+            color: #6aaa82;
             margin-top: 4px;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -63,14 +64,16 @@
         .date-section { margin-bottom: 3rem; }
 
         .date-label {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #444;
+            color: #fff;
+            background: #0f6b35;
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 4px;
             margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #1a1a1a;
         }
 
         .matches-grid {
@@ -80,8 +83,8 @@
         }
 
         .match-card {
-            background: #111;
-            border: 1px solid #1e1e1e;
+            background: #143d25;
+            border: 1px solid #2a6a42;
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
@@ -89,8 +92,8 @@
         }
 
         .match-card:hover {
-            border-color: #333;
-            background: #161616;
+            border-color: #4a9a62;
+            background: #1a4a2e;
         }
 
         .flags {
@@ -99,7 +102,7 @@
             justify-content: center;
             gap: 10px;
             padding: 1.5rem 1rem;
-            background: #0f0f0f;
+            background: #0f2d1c;
         }
 
         .flags img {
@@ -111,13 +114,13 @@
 
         .match-info {
             padding: 10px 12px;
-            border-top: 1px solid #1a1a1a;
+            border-top: 1px solid #2a6a42;
             text-align: center;
         }
 
         .match-teams {
             font-size: 12px;
-            color: #888;
+            color: #a0d0b0;
             line-height: 1.5;
         }
 
@@ -136,7 +139,7 @@
         .channel-bbc { background: #000; color: #FFD700; }
 
         .empty-state {
-            color: #333;
+            color: #4a7a5a;
             font-size: 13px;
             text-align: center;
             padding: 4rem;
@@ -212,7 +215,6 @@
             border-radius: 0 0 10px 10px;
         }
 
-        /* Black cover hides the thumbnail until video plays */
         .video-cover {
             position: absolute;
             inset: 0;
@@ -255,7 +257,7 @@
         <h1>No Spoilers World Cup</h1>
         <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
     </div>
-    <a class="kofi-btn" href="https://ko-fi.com" target="_blank">☕ Support on Ko-fi</a>
+    <a class="kofi-btn" href="https://ko-fi.com" target="_blank">&#9749; Support on Ko-fi</a>
 </header>
 
 <main id="main">
@@ -269,7 +271,7 @@
             <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         </div>
         <div class="video-wrap">
-            <iframe id="modal-iframe" allowfullscreen enable-api="1"></iframe>
+            <iframe id="modal-iframe" allowfullscreen></iframe>
             <div class="video-cover" id="video-cover">
                 <div class="spinner"></div>
             </div>
@@ -341,7 +343,7 @@
     function getFlag(name) {
         const key = name.toLowerCase().trim();
         const code = FLAGS[key];
-        if (!code) return `<span style="color:#888;font-size:12px">${name}</span>`;
+        if (!code) return `<span style="color:#a0d0b0;font-size:12px">${name}</span>`;
         return `<img src="https://flagcdn.com/w80/${code}.png" alt="${name}" title="${name}">`;
     }
 
@@ -354,39 +356,26 @@
 
     function openModal(videoId, team1, team2) {
         const cover = document.getElementById('video-cover');
+        const iframe = document.getElementById('modal-iframe');
         cover.classList.remove('hidden');
+        iframe.src = '';
 
-        // Use YouTube iframe API to detect playback state
-        document.getElementById('modal-iframe').src =
-            `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
-        document.getElementById('modal').classList.add('open');
         document.getElementById('modal-flags').innerHTML = getFlag(team1) + getFlag(team2);
+        document.getElementById('modal').classList.add('open');
 
-        // Listen for YouTube player state via postMessage
+        // Set src after a tiny delay so the browser registers the click as a user gesture for autoplay
         clearTimeout(coverTimer);
-        window.addEventListener('message', onYTMessage);
-
-        // Fallback: remove cover after 3s in case postMessage doesn't fire
-        coverTimer = setTimeout(() => cover.classList.add('hidden'), 3000);
-    }
-
-    function onYTMessage(e) {
-        try {
-            const data = JSON.parse(e.data);
-            // YouTube sends playerState 1 = playing
-            if (data.event === 'onStateChange' && data.info === 1) {
-                document.getElementById('video-cover').classList.add('hidden');
-                clearTimeout(coverTimer);
-                window.removeEventListener('message', onYTMessage);
-            }
-        } catch (_) {}
+        setTimeout(() => {
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            // Remove cover after 1.5s — enough time for autoplay to start
+            coverTimer = setTimeout(() => cover.classList.add('hidden'), 1500);
+        }, 50);
     }
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('modal-iframe').src = '';
         clearTimeout(coverTimer);
-        window.removeEventListener('message', onYTMessage);
     }
 
     document.getElementById('modal').addEventListener('click', function(e) {
