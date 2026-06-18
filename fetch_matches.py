@@ -90,7 +90,7 @@ def extract_teams(title):
 def fetch_page(api_key, page_token=None):
     params = {
         "part": "snippet",
-        "channelId": BBC_CHANNEL_ID,
+        "q": "2026 FIFA World Cup Highlights",
         "maxResults": "50",
         "order": "date",
         "type": "video",
@@ -108,21 +108,29 @@ def fetch_page(api_key, page_token=None):
 
 
 def fetch_highlights(api_key):
-    print("Fetching BBC Football channel via YouTube API...\n")
+    print("Searching for BBC Football highlights via YouTube API...\n")
 
     videos = []
     page_token = None
+    pages = 0
 
-    while True:
+    while pages < 5:
         data = fetch_page(api_key, page_token)
+        pages += 1
 
         for item in data.get("items", []):
             video_id = item["id"].get("videoId", "")
             snippet = item.get("snippet", {})
+            channel_id = snippet.get("channelId", "")
             title = snippet.get("title", "")
             published = snippet.get("publishedAt", "")[:10]
 
             print(f"TITLE: {title}")
+
+            if channel_id != BBC_CHANNEL_ID:
+                print("SKIPPED (not BBC Football)")
+                print("---")
+                continue
 
             if not is_highlight(title):
                 print("SKIPPED")
@@ -173,6 +181,20 @@ def main():
             matches.append(v)
 
     matches.sort(key=lambda x: x["date"] or "", reverse=True)
+
+    # Safety net: never overwrite a populated matches.json with an empty result
+    # (e.g. API quota error or a transient search glitch).
+    if not matches:
+        existing = []
+        if os.path.exists("matches.json"):
+            try:
+                with open("matches.json") as f:
+                    existing = json.load(f)
+            except Exception:
+                existing = []
+        if existing:
+            print("\nFound 0 matches; keeping existing matches.json unchanged.")
+            return
 
     with open("matches.json", "w") as f:
         json.dump(matches, f, indent=2)
