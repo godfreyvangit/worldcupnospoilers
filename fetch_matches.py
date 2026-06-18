@@ -60,7 +60,9 @@ EXCLUDE_KEYWORDS = [
 
 def is_highlight(title):
     t = title.lower()
-    if "2026 fifa world cup" not in t or "highlight" not in t:
+    # Channels vary the word order: BBC "2026 FIFA World Cup",
+    # FIFA "FIFA World Cup 2026". Match on the stable parts.
+    if "world cup" not in t or "2026" not in t or "highlight" not in t:
         return False
     return not any(kw in t for kw in EXCLUDE_KEYWORDS)
 
