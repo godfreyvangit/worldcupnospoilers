@@ -16,8 +16,8 @@ EARLIEST_DATE = "2026-06-08"
 # The 48 qualified FIFA World Cup 2026 teams (with spelling variants)
 TEAMS = [
     "Canada", "Mexico", "United States", "USA",
-    "Australia", "Iraq", "Iran", "Japan", "Jordan",
-    "South Korea", "Republic of Korea", "Qatar", "Saudi Arabia", "Uzbekistan",
+    "Australia", "Iraq", "IR Iran", "Iran", "Japan", "Jordan",
+    "South Korea", "Republic of Korea", "Korea Republic", "Qatar", "Saudi Arabia", "Uzbekistan",
     "Algeria", "Cape Verde", "Cabo Verde", "DR Congo", "Congo DR", "Democratic Republic of Congo",
     "Ivory Coast", "Cote d'Ivoire", "Egypt", "Ghana", "Morocco",
     "Senegal", "South Africa", "Tunisia",
@@ -43,7 +43,10 @@ CANONICAL = {
     "cote d'ivoire": "Ivory Coast",
     "ivory coast": "Ivory Coast",
     "republic of korea": "South Korea",
+    "korea republic": "South Korea",
     "south korea": "South Korea",
+    "ir iran": "Iran",
+    "iran": "Iran",
     "türkiye": "Turkey",
     "turkey": "Turkey",
     "united states": "USA",
@@ -55,6 +58,7 @@ CANONICAL = {
 EXCLUDE_KEYWORDS = [
     "preview", "compilation", "top 10", "top ten", "best goals",
     "every goal", "all goals", "review", "reaction", "press conference",
+    "alt cast",  # FIFA posts an alternate-commentary duplicate of each match
 ]
 
 
