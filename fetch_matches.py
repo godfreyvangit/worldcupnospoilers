@@ -63,6 +63,7 @@ EXCLUDE_KEYWORDS = [
     "live", "watch along", "watchalong", "full match", "extended",
     "documentary", "trailer", "q&a", "predict", "analysis", "explained",
     "interview", "build-up", "build up", "vlog", "behind the scenes",
+    "reacts", "football daily",
 ]
 
 
@@ -195,13 +196,22 @@ def main():
             print(f"ERROR fetching {channel['name']}: {e}")
             continue
 
+        # Load existing matches so we never lose ones that fell off the API results
+        existing = []
+        if os.path.exists(channel["file"]):
+            with open(channel["file"]) as f:
+                existing = json.load(f)
+
         seen = set()
         matches = []
-        for v in videos:
+        for v in existing + videos:
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
                 seen.add(key)
                 matches.append(v)
+
+        # Remove the rogue reaction video that slipped in previously
+        matches = [m for m in matches if is_highlight(m["title"])]
 
         matches.sort(key=lambda x: x["date"] or "", reverse=True)
 

@@ -72,14 +72,6 @@
     "channel": "BBC Football"
   },
   {
-    "videoId": "cAOpzqrDrA0",
-    "title": "\ud83d\ude31 CAPE VERDE SHOCK SPAIN! Guillem Balagu\u00e9 REACTS to upset | Football Daily | FIFA 2026 World Cup",
-    "team1": "Cape Verde",
-    "team2": "Spain",
-    "date": "2026-06-16",
-    "channel": "BBC Football"
-  },
-  {
     "videoId": "v7bNwNQzbKM",
     "title": "Iran 2-2 New Zealand \ud83c\uddee\ud83c\uddf7 \ud83c\uddf3\ud83c\uddff | SENSATIONAL GOALS! | 2026 FIFA World Cup Highlights | Group G",
     "team1": "Iran",
@@ -144,10 +136,34 @@
     "channel": "BBC Football"
   },
   {
+    "videoId": "vUwkLY_uNiw",
+    "title": "Haiti 0-1 Scotland Highlights | 2026 FIFA World Cup | Group C",
+    "team1": "Haiti",
+    "team2": "Scotland",
+    "date": "2026-06-14",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "oBklTAifI6c",
+    "title": "Brazil 1-1 Morocco Highlights | 2026 FIFA World Cup | Group C",
+    "team1": "Brazil",
+    "team2": "Morocco",
+    "date": "2026-06-14",
+    "channel": "BBC Football"
+  },
+  {
     "videoId": "mB-H7V6tp_o",
     "title": "USA 4-1 Paraguay Highlights \ud83c\uddfa\ud83c\uddf8 \ud83c\uddf5\ud83c\uddfe | 2026 FIFA World Cup | Group D",
     "team1": "USA",
     "team2": "Paraguay",
+    "date": "2026-06-13",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "hcefv-X6Z7I",
+    "title": "Qatar 1-1 Switzerland Highlights | 2026 FIFA World Cup | Group B",
+    "team1": "Qatar",
+    "team2": "Switzerland",
     "date": "2026-06-13",
     "channel": "BBC Football"
   },
@@ -165,6 +181,14 @@
     "team1": "South Korea",
     "team2": "Czechia",
     "date": "2026-06-12",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "zsrZc72hbgY",
+    "title": "Mexico 2-0 South Africa | 2026 FIFA World Cup Highlights | Group A",
+    "team1": "Mexico",
+    "team2": "South Africa",
+    "date": "2026-06-11",
     "channel": "BBC Football"
   }
 ]
