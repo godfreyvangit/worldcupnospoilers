@@ -7,7 +7,8 @@ import sys
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-SEARCH_FROM_DATE = "20260608"  # 8th June 2026
+MAX_VIDEOS = 500
+EARLIEST_DATE = "20260608"  # stop processing videos older than this
 
 
 def is_highlight(title):
@@ -37,14 +38,14 @@ def parse_upload_date(date_str):
 
 
 def fetch_bbc_videos():
-    print(f"Fetching BBC Football channel (videos since {SEARCH_FROM_DATE})...\n")
+    print(f"Fetching BBC Football channel...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--dateafter", SEARCH_FROM_DATE,
+        "--playlist-end", str(MAX_VIDEOS),
         BBC_CHANNEL_URL,
     ]
 
@@ -66,8 +67,13 @@ def fetch_bbc_videos():
 
         title = item.get("title", "")
         video_id = item.get("id", "")
-        upload_date = parse_upload_date(item.get("upload_date", ""))
+        upload_date = item.get("upload_date", "")
         duration = item.get("duration") or 0
+
+        # Stop once we've gone past the earliest date we care about
+        if upload_date and upload_date < EARLIEST_DATE:
+            print(f"Reached videos older than {EARLIEST_DATE}, stopping.")
+            break
 
         if duration <= 60:
             continue  # skip Shorts
@@ -93,7 +99,7 @@ def fetch_bbc_videos():
             "title": title,
             "team1": team1,
             "team2": team2,
-            "date": upload_date,
+            "date": parse_upload_date(upload_date),
             "channel": "BBC Football",
         })
         print(f"ADDED (date: {upload_date})")
