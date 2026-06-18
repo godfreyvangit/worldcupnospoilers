@@ -8,6 +8,44 @@ import urllib.parse
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 EARLIEST_DATE = "2026-06-08"
 
+# All 48 FIFA World Cup 2026 teams
+TEAMS = [
+    "Argentina", "Australia", "Austria", "Belgium", "Bolivia", "Bosnia and Herzegovina",
+    "Brazil", "Canada", "Cape Verde", "Chile", "Colombia", "Costa Rica",
+    "Croatia", "Curaçao", "Curacao", "Czechia", "Czech Republic",
+    "DR Congo", "Democratic Republic of Congo",
+    "Ecuador", "Egypt", "England", "France", "Germany", "Ghana", "Greece",
+    "Haiti", "Honduras", "Hungary",
+    "Indonesia", "Iran", "Iraq", "Ivory Coast", "Cote d'Ivoire",
+    "Japan", "Jordan", "Kenya",
+    "Mali", "Mexico", "Montenegro", "Morocco",
+    "Netherlands", "New Zealand", "Nigeria", "North Korea", "Norway",
+    "Panama", "Paraguay", "Peru", "Poland", "Portugal",
+    "Qatar",
+    "Romania",
+    "Saudi Arabia", "Scotland", "Senegal", "Serbia", "Slovakia", "Slovenia",
+    "South Africa", "South Korea", "Republic of Korea", "Spain", "Sweden", "Switzerland",
+    "Thailand", "Tunisia", "Turkey",
+    "Ukraine", "United States", "USA", "Uruguay", "Uzbekistan",
+    "Venezuela",
+]
+
+# Canonical names for display (normalize variants)
+CANONICAL = {
+    "curacao": "Curaçao",
+    "curaçao": "Curaçao",
+    "czech republic": "Czechia",
+    "czechia": "Czechia",
+    "democratic republic of congo": "DR Congo",
+    "dr congo": "DR Congo",
+    "cote d'ivoire": "Ivory Coast",
+    "ivory coast": "Ivory Coast",
+    "republic of korea": "South Korea",
+    "south korea": "South Korea",
+    "united states": "USA",
+    "usa": "USA",
+}
+
 
 def is_highlight(title):
     t = title.lower()
@@ -15,16 +53,28 @@ def is_highlight(title):
 
 
 def extract_teams(title):
+    title_lower = title.lower()
+    found = []
+    # Sort by length desc so "South Korea" matches before "Korea"
+    for team in sorted(TEAMS, key=len, reverse=True):
+        if team.lower() in title_lower:
+            canonical = CANONICAL.get(team.lower(), team)
+            if canonical not in found:
+                found.append(canonical)
+        if len(found) == 2:
+            break
+    if len(found) >= 2:
+        return found[0], found[1]
+
+    # Fallback: regex-based extraction
     first_part = title.split("|")[0].strip()
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
     first_part = re.sub(r"\s+[Hh]ighlights\s*$", "", first_part).strip()
 
-    # "Team1 1-4 Team2" format
     m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
     if m:
         return m.group(1).strip(), m.group(2).strip()
 
-    # "Team1 v Team2" format
     m = re.match(r"^(.+?)\s+v\s+(.+?)$", first_part)
     if m:
         return m.group(1).strip(), m.group(2).strip()
@@ -63,7 +113,7 @@ def fetch_highlights(api_key):
             video_id = item["id"].get("videoId", "")
             snippet = item.get("snippet", {})
             title = snippet.get("title", "")
-            published = snippet.get("publishedAt", "")[:10]  # YYYY-MM-DD
+            published = snippet.get("publishedAt", "")[:10]
 
             print(f"TITLE: {title}")
 
