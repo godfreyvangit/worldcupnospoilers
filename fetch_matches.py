@@ -7,9 +7,6 @@ import sys
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-EARLIEST_DATE = "20260608"
-
-
 def is_highlight(title):
     t = title.lower()
     return "2026 fifa world cup" in t and "highlight" in t
@@ -68,10 +65,6 @@ def fetch_bbc_videos():
         video_id = item.get("id", "")
         upload_date = item.get("upload_date", "")
         duration = item.get("duration") or 0
-
-        if upload_date and upload_date < EARLIEST_DATE:
-            print(f"Reached videos older than {EARLIEST_DATE}, stopping.")
-            break
 
         if duration <= 60:
             continue
