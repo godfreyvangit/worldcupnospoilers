@@ -7,7 +7,7 @@ import sys
 BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
 BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
 
-MAX_VIDEOS = 200
+MAX_VIDEOS = 100
 
 
 def is_highlight(title):
@@ -67,6 +67,10 @@ def fetch_bbc_videos():
         title = item.get("title", "")
         video_id = item.get("id", "")
         upload_date = parse_upload_date(item.get("upload_date", ""))
+        duration = item.get("duration") or 0
+
+        if duration <= 60:
+            continue  # skip Shorts
 
         print(f"TITLE: {title}")
 
