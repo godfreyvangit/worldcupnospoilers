@@ -75,7 +75,9 @@ def is_highlight(title):
     # against non-match clips instead.
     if "world cup" not in t or "2026" not in t:
         return False
-    return not any(kw in t for kw in EXCLUDE_KEYWORDS)
+    # Whole-word match so short keywords like "live" don't trip on "deliver",
+    # "Oliver", "alive", etc.
+    return not any(re.search(r"\b" + re.escape(kw) + r"\b", t) for kw in EXCLUDE_KEYWORDS)
 
 
 def extract_teams(title):
