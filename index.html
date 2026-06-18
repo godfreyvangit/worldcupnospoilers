@@ -99,8 +99,14 @@
             justify-content: center;
             gap: 10px;
             padding: 1.5rem 1rem;
-            font-size: 44px;
             background: #0f0f0f;
+        }
+
+        .flags img {
+            width: 48px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 3px;
         }
 
         .match-info {
@@ -206,12 +212,19 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 20px;
+        }
+
+        .title-cover img {
+            width: 32px;
+            height: 24px;
+            object-fit: cover;
+            border-radius: 2px;
         }
 
         @media (max-width: 600px) {
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .flags { font-size: 36px; padding: 1.2rem 0.8rem; }
+            .flags { padding: 1.2rem 0.8rem; }
+            .flags img { width: 40px; height: 30px; }
         }
     </style>
 </head>
@@ -243,71 +256,70 @@
 
 <script>
     const FLAGS = {
-        "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-        "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-        "france": "🇫🇷",
-        "germany": "🇩🇪",
-        "spain": "🇪🇸",
-        "portugal": "🇵🇹",
-        "netherlands": "🇳🇱",
-        "belgium": "🇧🇪",
-        "croatia": "🇭🇷",
-        "austria": "🇦🇹",
-        "norway": "🇳🇴",
-        "sweden": "🇸🇪",
-        "switzerland": "🇨🇭",
-        "czechia": "🇨🇿",
-        "czech republic": "🇨🇿",
-        "turkey": "🇹🇷",
-        "türkiye": "🇹🇷",
-        "bosnia and herzegovina": "🇧🇦",
-        "bosnia-herzegovina": "🇧🇦",
-        "bosnia & herzegovina": "🇧🇦",
-        "bosnia": "🇧🇦",
-        "brazil": "🇧🇷",
-        "argentina": "🇦🇷",
-        "colombia": "🇨🇴",
-        "ecuador": "🇪🇨",
-        "uruguay": "🇺🇾",
-        "paraguay": "🇵🇾",
-        "mexico": "🇲🇽",
-        "usa": "🇺🇸",
-        "united states": "🇺🇸",
-        "canada": "🇨🇦",
-        "panama": "🇵🇦",
-        "haiti": "🇭🇹",
-        "curacao": "🇨🇼",
-        "curaçao": "🇨🇼",
-        "japan": "🇯🇵",
-        "south korea": "🇰🇷",
-        "korea republic": "🇰🇷",
-        "australia": "🇦🇺",
-        "iran": "🇮🇷",
-        "ir iran": "🇮🇷",
-        "iraq": "🇮🇶",
-        "saudi arabia": "🇸🇦",
-        "jordan": "🇯🇴",
-        "qatar": "🇶🇦",
-        "uzbekistan": "🇺🇿",
-        "morocco": "🇲🇦",
-        "senegal": "🇸🇳",
-        "ghana": "🇬🇭",
-        "egypt": "🇪🇬",
-        "algeria": "🇩🇿",
-        "tunisia": "🇹🇳",
-        "south africa": "🇿🇦",
-        "côte d'ivoire": "🇨🇮",
-        "ivory coast": "🇨🇮",
-        "congo dr": "🇨🇩",
-        "dr congo": "🇨🇩",
-        "cabo verde": "🇨🇻",
-        "cape verde": "🇨🇻",
-        "new zealand": "🇳🇿"
+        "england": "gb-eng",
+        "scotland": "gb-sct",
+        "france": "fr",
+        "germany": "de",
+        "spain": "es",
+        "portugal": "pt",
+        "netherlands": "nl",
+        "belgium": "be",
+        "croatia": "hr",
+        "austria": "at",
+        "norway": "no",
+        "sweden": "se",
+        "switzerland": "ch",
+        "czechia": "cz",
+        "czech republic": "cz",
+        "turkey": "tr",
+        "türkiye": "tr",
+        "bosnia and herzegovina": "ba",
+        "bosnia": "ba",
+        "brazil": "br",
+        "argentina": "ar",
+        "colombia": "co",
+        "ecuador": "ec",
+        "uruguay": "uy",
+        "paraguay": "py",
+        "mexico": "mx",
+        "usa": "us",
+        "united states": "us",
+        "canada": "ca",
+        "panama": "pa",
+        "haiti": "ht",
+        "curacao": "cw",
+        "curaçao": "cw",
+        "japan": "jp",
+        "south korea": "kr",
+        "republic of korea": "kr",
+        "australia": "au",
+        "iran": "ir",
+        "iraq": "iq",
+        "saudi arabia": "sa",
+        "jordan": "jo",
+        "qatar": "qa",
+        "uzbekistan": "uz",
+        "morocco": "ma",
+        "senegal": "sn",
+        "ghana": "gh",
+        "egypt": "eg",
+        "algeria": "dz",
+        "tunisia": "tn",
+        "south africa": "za",
+        "ivory coast": "ci",
+        "côte d'ivoire": "ci",
+        "dr congo": "cd",
+        "congo dr": "cd",
+        "cape verde": "cv",
+        "cabo verde": "cv",
+        "new zealand": "nz"
     };
 
     function getFlag(name) {
-        const clean = name.toLowerCase().replace(/\s+\d+\s+\w.*$/, '').trim();
-        return FLAGS[clean] || FLAGS[name.toLowerCase()] || "🏳";
+        const key = name.toLowerCase().trim();
+        const code = FLAGS[key];
+        if (!code) return `<span style="color:#444;font-size:11px">${name}</span>`;
+        return `<img src="https://flagcdn.com/w80/${code}.png" alt="${name}" title="${name}">`;
     }
 
     function formatDate(dateStr) {
@@ -319,7 +331,7 @@
         document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('modal').classList.add('open');
         document.getElementById('title-cover').innerHTML =
-            `<span>${getFlag(team1)}</span><span>${getFlag(team2)}</span>`;
+            `${getFlag(team1)}${getFlag(team2)}`;
     }
 
     function closeModal() {
@@ -335,7 +347,7 @@
 
     async function loadMatches() {
         try {
-            const res = await fetch('matches.json');
+            const res = await fetch('matches.json?t=' + Date.now());
             const matches = await res.json();
 
             if (!matches.length) {
@@ -362,8 +374,8 @@
                     html += `
                         <div class="match-card" onclick="openModal('${m.videoId}', '${m.team1}', '${m.team2}')">
                             <div class="flags">
-                                <span>${getFlag(m.team1)}</span>
-                                <span>${getFlag(m.team2)}</span>
+                                ${getFlag(m.team1)}
+                                ${getFlag(m.team2)}
                             </div>
                             <div class="match-info">
                                 <div class="match-teams">${m.team1}<br>${m.team2}</div>
