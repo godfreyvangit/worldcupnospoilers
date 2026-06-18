@@ -53,21 +53,31 @@ CANONICAL = {
 }
 
 
-# Compilations / previews are not single-match highlights and would be mislabelled
+# Non-highlight clips (previews, reactions, full matches, live streams) would be
+# mislabelled as matches, so exclude them explicitly. We can't rely on the word
+# "highlights" being present (BBC sometimes omits it), so this list is the main guard.
 EXCLUDE_KEYWORDS = [
     "preview", "compilation", "top 10", "top ten", "best goals",
     "every goal", "all goals", "review", "reaction", "press conference",
     "alt cast",  # FIFA posts an alternate-commentary duplicate of each match
+    "live", "watch along", "watchalong", "full match", "extended",
+    "documentary", "trailer", "q&a", "predict", "analysis", "explained",
+    "interview", "build-up", "build up", "vlog", "behind the scenes",
 ]
 
 
 def is_highlight(title):
     t = title.lower()
     # Channels vary the word order: BBC "2026 FIFA World Cup",
-    # FIFA "FIFA World Cup 2026". Match on the stable parts.
-    if "world cup" not in t or "2026" not in t or "highlight" not in t:
+    # FIFA "FIFA World Cup 2026". Match on the stable parts. We do NOT require the
+    # word "highlights" because BBC occasionally omits it (e.g. "Team v Team |
+    # 2026 FIFA World Cup | Group A"); team extraction + EXCLUDE_KEYWORDS guard
+    # against non-match clips instead.
+    if "world cup" not in t or "2026" not in t:
         return False
-    return not any(kw in t for kw in EXCLUDE_KEYWORDS)
+    # Whole-word match so short keywords like "live" don't trip on "deliver",
+    # "Oliver", "alive", etc.
+    return not any(re.search(r"\b" + re.escape(kw) + r"\b", t) for kw in EXCLUDE_KEYWORDS)
 
 
 def extract_teams(title):
