@@ -6,6 +6,7 @@ import sys
 
 SEARCHES = [
     ("BBC Football", "2026 FIFA World Cup Highlights BBC Football"),
+    ("BBC Sport", "2026 FIFA World Cup Highlights BBC Sport"),
 ]
 
 MAX_RESULTS = 50
@@ -13,23 +14,45 @@ MAX_RESULTS = 50
 
 def is_highlight(title):
     t = title.lower()
-    return "2026 fifa world cup" in t and "highlight" in t
+    is_wc = "2026 fifa world cup" in t or "fifa world cup 2026" in t
+    is_match = "highlight" in t
+    return is_wc and is_match
 
 
 def extract_teams(title):
     """
-    Example:
-    Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
-    Returns: ("Iraq", "Norway")
+    Handles multiple formats:
+      Iraq 1-4 Norway 🇮🇶 🇳🇴 | HAALAND DEBUT DOUBLE! | 2026 FIFA World Cup Highlights | Group G
+      Highlights | Canada 1-1 Bosnia and Herzegovina | FIFA World Cup 2026™
+      Spain vs Cape Verde Extended Highlights 🌎🏆 2026 FIFA World Cup™
+      ARGENTINA vs ALGERIA 3-0 | 2026 FIFA World Cup | Match Highlights
     """
-    first_part = title.split("|")[0].strip()
-    first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
+    # Strip emoji and symbols, normalise
+    clean = re.sub(r"[^\x00-\x7F]+", " ", title).strip()
 
-    match = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
-    if not match:
-        return None, None
+    # Format: "Team1 X-X Team2" (score in middle)
+    m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)(?:\s*[|\|].*)?$", clean)
+    if m:
+        t1, t2 = m.group(1).strip(), m.group(2).strip()
+        # Strip trailing noise from team2
+        t2 = re.split(r"\s+(?:extended|highlights|match)", t2, flags=re.IGNORECASE)[0].strip()
+        if t1 and t2:
+            return t1, t2
 
-    return match.group(1).strip(), match.group(2).strip()
+    # Format: "Highlights | Team1 X-X Team2 | ..."
+    m = re.match(r"^highlights\s*\|\s*(.+?)\s+\d+[\-–]\d+\s+(.+?)(?:\s*\|.*)?$", clean, re.IGNORECASE)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+
+    # Format: "Team1 vs Team2 ..." or "TEAM1 vs TEAM2 X-X | ..."
+    m = re.match(r"^(.+?)\s+vs\.?\s+(.+?)(?:\s+\d+[\-–]\d+)?(?:\s*[|\|].*)?$", clean, re.IGNORECASE)
+    if m:
+        t1 = m.group(1).strip()
+        t2 = re.split(r"\s+(?:extended|highlights|match|\d)", m.group(2), flags=re.IGNORECASE)[0].strip()
+        if t1 and t2:
+            return t1, t2
+
+    return None, None
 
 
 def parse_upload_date(date_str):
@@ -39,8 +62,8 @@ def parse_upload_date(date_str):
     return None
 
 
-def search_videos(channel_name, query):
-    print(f"\nSearching for {channel_name} highlights...\n")
+def search_videos(label, query):
+    print(f"\nSearching: {query}\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
@@ -53,7 +76,7 @@ def search_videos(channel_name, query):
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"ERROR searching {channel_name}: {result.stderr[:500]}")
+        print(f"ERROR: {result.stderr[:500]}")
         return []
 
     videos = []
@@ -92,7 +115,7 @@ def search_videos(channel_name, query):
             "team1": team1,
             "team2": team2,
             "date": upload_date,
-            "channel": channel_name,
+            "channel": label,
         })
         print(f"ADDED (date: {upload_date})")
         print("---")
@@ -104,8 +127,8 @@ def main():
     all_matches = []
     seen = set()
 
-    for channel_name, query in SEARCHES:
-        videos = search_videos(channel_name, query)
+    for label, query in SEARCHES:
+        videos = search_videos(label, query)
         for v in videos:
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
