@@ -4,11 +4,8 @@ import subprocess
 import sys
 
 
-BBC_CHANNEL_ID = "UCli0KmmXMDjcgqvsheHfv-Q"
-BBC_CHANNEL_URL = f"https://www.youtube.com/channel/{BBC_CHANNEL_ID}/videos"
-
-MAX_VIDEOS = 500
-EARLIEST_DATE = "20260608"  # stop processing videos older than this
+EARLIEST_DATE = "20260608"
+MAX_RESULTS = 200
 
 
 def is_highlight(title):
@@ -37,16 +34,15 @@ def parse_upload_date(date_str):
     return None
 
 
-def fetch_bbc_videos():
-    print(f"Fetching BBC Football channel...\n")
+def fetch_highlights():
+    print("Searching YouTube for 2026 FIFA World Cup Highlights...\n")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
-        "--playlist-end", str(MAX_VIDEOS),
-        BBC_CHANNEL_URL,
+        f"ytsearch{MAX_RESULTS}:2026 FIFA World Cup Highlights",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -69,19 +65,24 @@ def fetch_bbc_videos():
         video_id = item.get("id", "")
         upload_date = item.get("upload_date", "")
         duration = item.get("duration") or 0
+        channel = item.get("channel", "") or item.get("uploader", "") or ""
 
-        # Stop once we've gone past the earliest date we care about
+        if "bbc" not in channel.lower():
+            print(f"SKIP (not BBC, channel={channel!r}): {title[:60]}")
+            continue
+
         if upload_date and upload_date < EARLIEST_DATE:
-            print(f"Reached videos older than {EARLIEST_DATE}, stopping.")
-            break
+            print(f"SKIP (too old {upload_date}): {title[:60]}")
+            continue
 
         if duration <= 60:
-            continue  # skip Shorts
+            continue
 
         print(f"TITLE: {title}")
+        print(f"CHANNEL: {channel}")
 
         if not is_highlight(title):
-            print("SKIPPED")
+            print("SKIPPED (not a highlight)")
             print("---")
             continue
 
@@ -100,7 +101,7 @@ def fetch_bbc_videos():
             "team1": team1,
             "team2": team2,
             "date": parse_upload_date(upload_date),
-            "channel": "BBC Football",
+            "channel": "BBC Sport",
         })
         print(f"ADDED (date: {upload_date})")
         print("---")
@@ -109,7 +110,7 @@ def fetch_bbc_videos():
 
 
 def main():
-    videos = fetch_bbc_videos()
+    videos = fetch_highlights()
 
     seen = set()
     matches = []
