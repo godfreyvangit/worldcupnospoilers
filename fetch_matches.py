@@ -19,11 +19,17 @@ def extract_teams(title):
     first_part = re.sub(r"[^\x00-\x7F]+", "", first_part).strip()
     first_part = re.sub(r"\s+[Hh]ighlights\s*$", "", first_part).strip()
 
+    # "Team1 1-4 Team2" format
     m = re.match(r"^(.+?)\s+\d+[\-–]\d+\s+(.+?)$", first_part)
-    if not m:
-        return None, None
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
 
-    return m.group(1).strip(), m.group(2).strip()
+    # "Team1 v Team2" format
+    m = re.match(r"^(.+?)\s+v\s+(.+?)$", first_part)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+
+    return None, None
 
 
 def fetch_page(api_key, page_token=None):
