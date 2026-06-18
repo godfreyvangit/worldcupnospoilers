@@ -159,7 +159,6 @@
 
         .channel-itv { background: #1a0a2e; color: #9b59b6; }
         .channel-bbc { background: #000; color: #FFD700; }
-        .channel-fifa { background: #002b5c; color: #ffffff; }
 
         .empty-state {
             color: #4a7a5a;
@@ -429,7 +428,6 @@
     function channelClass(name) {
         const n = name.toLowerCase();
         if (n.includes('itv')) return 'itv';
-        if (n.includes('fifa')) return 'fifa';
         return 'bbc';
     }
 
