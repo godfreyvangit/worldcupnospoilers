@@ -9,7 +9,6 @@ import urllib.parse
 CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
-    {"id": "UCpcTrCXblq78GZrTUTLWeBw", "name": "FIFA", "file": "matches_fifa.json"},
 ]
 EARLIEST_DATE = "2026-06-08"
 
