@@ -316,6 +316,16 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px;
+                padding: 1.5rem 1.25rem 1.25rem;
+            }
+            header h1 { font-size: 15px; line-height: 1.4; }
+            header p { font-size: 11px; margin-top: 6px; line-height: 1.5; }
+            .header-controls { gap: 10px; }
+            .channel-select { flex: 1; }
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
             .flags { padding: 1.2rem 0.8rem; }
             .flags img { width: 40px; height: 30px; }
