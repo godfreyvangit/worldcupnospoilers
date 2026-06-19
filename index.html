@@ -419,6 +419,9 @@
                         }
                     },
                     onError: () => {
+                        // Embedding blocked — fall back to plain iframe so video still loads
+                        document.getElementById('player-container').innerHTML =
+                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
                         document.getElementById('video-cover').classList.add('hidden');
                     }
                 }
