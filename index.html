@@ -414,7 +414,7 @@
                 events: {
                     onReady: (e) => { e.target.playVideo(); },
                     onStateChange: (e) => {
-                        if (e.data === YT.PlayerState.PLAYING) {
+                        if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
                             document.getElementById('video-cover').classList.add('hidden');
                         }
                     },
