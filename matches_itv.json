@@ -1,5 +1,21 @@
 [
   {
+    "videoId": "igQo36nrUeM",
+    "title": "HIGHLIGHTS - Mexico v South Korea | Close Game! | FIFA World Cup 2026",
+    "team1": "Mexico",
+    "team2": "South Korea",
+    "date": "2026-06-19",
+    "channel": "ITV Sport"
+  },
+  {
+    "videoId": "n44ndE6mwV0",
+    "title": "HIGHLIGHTS - Canada v Qatar | Hosts Eye First Win! | FIFA World Cup 2026",
+    "team1": "Canada",
+    "team2": "Qatar",
+    "date": "2026-06-19",
+    "channel": "ITV Sport"
+  },
+  {
     "videoId": "eIOPOv7Jp88",
     "title": "HIGHLIGHTS - Switzerland v Bosnia and Herzegovina | Crazy 15-minutes! | FIFA World Cup 2026",
     "team1": "Switzerland",
@@ -28,6 +44,14 @@
     "title": "HIGHLIGHTS - Ghana v Panama | More Late World Cup Drama! | FIFA World Cup 2026",
     "team1": "Ghana",
     "team2": "Panama",
+    "date": "2026-06-18",
+    "channel": "ITV Sport"
+  },
+  {
+    "videoId": "vpWPyEKTCLw",
+    "title": "Cyle Larin fires Canada ahead early v Qatar! | Canada v Qatar | FIFA World Cup 2026",
+    "team1": "Canada",
+    "team2": "Qatar",
     "date": "2026-06-18",
     "channel": "ITV Sport"
   },
