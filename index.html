@@ -422,11 +422,7 @@
 
     let currentVideoId = null;
     let player = null;
-    let ytApiReady = false;
     let starting = false;
-
-    // Flag set once the YouTube IFrame API has loaded
-    window.onYouTubeIframeAPIReady = function () { ytApiReady = true; };
 
     function startVideo() {
         if (!currentVideoId || starting) return;   // guard against double clicks
@@ -442,6 +438,7 @@
                 videoId: currentVideoId,
                 playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1 },
                 events: {
+                    onReady: (e) => { e.target.playVideo(); },   // insurance for autoplay
                     onStateChange: (e) => {
                         // 1 = PLAYING: only now is it safe to reveal the video
                         if (e.data === YT.PlayerState.PLAYING) {
@@ -452,13 +449,16 @@
             });
         };
 
-        if (ytApiReady) {
-            create();
-        } else {
-            const wait = setInterval(() => {
-                if (ytApiReady) { clearInterval(wait); create(); }
-            }, 50);
-        }
+        // Check the API object directly (don't rely on a callback flag that
+        // could fire before this script registers its handler).
+        const waitForApi = () => {
+            if (window.YT && window.YT.Player) {
+                create();
+            } else {
+                setTimeout(waitForApi, 50);
+            }
+        };
+        waitForApi();
     }
 
     function resetCover() {
