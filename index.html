@@ -398,47 +398,17 @@
     }
 
     function startVideo() {
-        if (!currentVideoId || starting) return;   // ignore extra clicks
+        if (!currentVideoId || starting) return;
         starting = true;
 
-        // Show a spinner; KEEP the black cover up so YouTube's own
-        // thumbnail/play-button is never seen. We tell the player to play
-        // ourselves, and only lift the cover once it is actually PLAYING.
-        document.getElementById('cover-inner').innerHTML = '<div class="spinner"></div>';
-        document.getElementById('player-container').innerHTML = '<div id="yt-player"></div>';
+        const videoId = currentVideoId;
+        document.getElementById('player-container').innerHTML =
+            `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 
-        const make = () => {
-            player = new YT.Player('yt-player', {
-                videoId: currentVideoId,
-                playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1 },
-                events: {
-                    onReady: (e) => { e.target.playVideo(); },
-                    onStateChange: (e) => {
-                        if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
-                            document.getElementById('video-cover').classList.add('hidden');
-                        }
-                    },
-                    onError: () => {
-                        // Embedding blocked — fall back to plain iframe so video still loads
-                        document.getElementById('player-container').innerHTML =
-                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                        document.getElementById('video-cover').classList.add('hidden');
-                    }
-                }
-            });
-            setTimeout(() => {
-                document.getElementById('video-cover').classList.add('hidden');
-            }, 8000);
-        };
-
-        // Wait until the API object exists, then create the player
-        if (window.YT && window.YT.Player) {
-            make();
-        } else {
-            const wait = setInterval(() => {
-                if (window.YT && window.YT.Player) { clearInterval(wait); make(); }
-            }, 50);
-        }
+        // Keep cover up briefly so autoplay starts before the thumbnail can show
+        setTimeout(() => {
+            document.getElementById('video-cover').classList.add('hidden');
+        }, 1000);
     }
 
     function openModal(videoId, team1, team2) {
