@@ -229,7 +229,8 @@
         }
 
         .video-wrap iframe,
-        .video-wrap #player-container {
+        .video-wrap #player-container,
+        .video-wrap #yt-player {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -296,6 +297,17 @@
 
         .play-btn svg { width: 32px; height: 32px; fill: #fff; margin-left: 4px; }
 
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.25);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 600px) {
             .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
             .flags { padding: 1.2rem 0.8rem; }
@@ -335,14 +347,17 @@
             <div id="player-container"></div>
             <div class="title-bar" id="title-bar"></div>
             <div class="video-cover" id="video-cover" onclick="startVideo()">
-                <div class="play-btn">
-                    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                <div id="cover-inner">
+                    <div class="play-btn">
+                        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const FLAGS = {
         "england": "gb-eng", "scotland": "gb-sct", "france": "fr", "germany": "de",
@@ -374,21 +389,62 @@
     }
 
     let currentVideoId = null;
+    let player = null;
+    let starting = false;
+
+    function setCoverPlay() {
+        document.getElementById('cover-inner').innerHTML =
+            '<div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>';
+    }
 
     function startVideo() {
-        if (!currentVideoId) return;
-        document.getElementById('video-cover').classList.add('hidden');
-        document.getElementById('player-container').innerHTML =
-            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1"
-                allow="autoplay; encrypted-media" allowfullscreen
-                style="position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:0 0 10px 10px;">
-            </iframe>`;
+        if (!currentVideoId || starting) return;   // ignore extra clicks
+        starting = true;
+
+        // Show a spinner; KEEP the black cover up so YouTube's own
+        // thumbnail/play-button is never seen. We tell the player to play
+        // ourselves, and only lift the cover once it is actually PLAYING.
+        document.getElementById('cover-inner').innerHTML = '<div class="spinner"></div>';
+        document.getElementById('player-container').innerHTML = '<div id="yt-player"></div>';
+
+        const make = () => {
+            player = new YT.Player('yt-player', {
+                videoId: currentVideoId,
+                playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1 },
+                events: {
+                    onReady: (e) => { e.target.playVideo(); },
+                    onStateChange: (e) => {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            document.getElementById('video-cover').classList.add('hidden');
+                        }
+                    },
+                    onError: () => {
+                        document.getElementById('video-cover').classList.add('hidden');
+                    }
+                }
+            });
+            setTimeout(() => {
+                document.getElementById('video-cover').classList.add('hidden');
+            }, 8000);
+        };
+
+        // Wait until the API object exists, then create the player
+        if (window.YT && window.YT.Player) {
+            make();
+        } else {
+            const wait = setInterval(() => {
+                if (window.YT && window.YT.Player) { clearInterval(wait); make(); }
+            }, 50);
+        }
     }
 
     function openModal(videoId, team1, team2) {
         currentVideoId = videoId;
+        starting = false;
+        if (player) { try { player.destroy(); } catch (e) {} player = null; }
         document.getElementById('player-container').innerHTML = '';
         document.getElementById('video-cover').classList.remove('hidden');
+        setCoverPlay();
         const flagsHtml = getFlag(team1) + getFlag(team2);
         document.getElementById('modal-flags').innerHTML = flagsHtml;
         document.getElementById('title-bar').innerHTML = flagsHtml;
@@ -397,8 +453,11 @@
 
     function closeModal() {
         document.getElementById('modal').classList.remove('open');
-        document.getElementById('video-cover').classList.remove('hidden');
+        starting = false;
+        if (player) { try { player.destroy(); } catch (e) {} player = null; }
         document.getElementById('player-container').innerHTML = '';
+        document.getElementById('video-cover').classList.remove('hidden');
+        setCoverPlay();
         currentVideoId = null;
     }
 
