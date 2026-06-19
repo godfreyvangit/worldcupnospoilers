@@ -1,5 +1,21 @@
 [
   {
+    "videoId": "AL7kucXyTY0",
+    "title": "Mexico v South Korea \ud83c\uddf2\ud83c\uddfd\ud83c\uddf0\ud83c\uddf7 | 2026 FIFA World Cup | Group A",
+    "team1": "Mexico",
+    "team2": "South Korea",
+    "date": "2026-06-19",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "3lizpdpIi78",
+    "title": "Canada v Qatar \ud83c\udde8\ud83c\udde6\ud83c\uddf6\ud83c\udde6 | 2026 FIFA World Cup | Group B",
+    "team1": "Canada",
+    "team2": "Qatar",
+    "date": "2026-06-19",
+    "channel": "BBC Football"
+  },
+  {
     "videoId": "duKt7XzP8uE",
     "title": "Czech Republic v South Africa \ud83c\udde8\ud83c\uddff\ud83c\uddff\ud83c\udde6 | 2026 FIFA World Cup | Group A",
     "team1": "Czechia",
@@ -20,6 +36,14 @@
     "title": "Ghana 1-0 Panama Highlights \ud83c\uddec\ud83c\udded\ud83c\uddf5\ud83c\udde6 | 2026 FIFA World Cup | Group L",
     "team1": "Ghana",
     "team2": "Panama",
+    "date": "2026-06-18",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "WdclfNTFyAY",
+    "title": "Switzerland v Bosnia-Herzegovina \ud83c\udde8\ud83c\udded\ud83c\udde7\ud83c\udde6 | 2026 FIFA World Cup | Group B",
+    "team1": "Switzerland",
+    "team2": "Bosnia and Herzegovina",
     "date": "2026-06-18",
     "channel": "BBC Football"
   },
@@ -148,6 +172,14 @@
     "title": "Brazil 1-1 Morocco Highlights | 2026 FIFA World Cup | Group C",
     "team1": "Brazil",
     "team2": "Morocco",
+    "date": "2026-06-14",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "2WdbfZxEZ1o",
+    "title": "Australia 2-0 Turkey Highlights \ud83c\udde6\ud83c\uddfa\ud83c\uddf9\ud83c\uddf7 | 2026 FIFA World Cup | Group D",
+    "team1": "Australia",
+    "team2": "Turkey",
     "date": "2026-06-14",
     "channel": "BBC Football"
   },
