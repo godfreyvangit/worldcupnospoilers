@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>World Cup No Spoilers</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6478RB7CJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-Q6478RB7CJ');
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,11 +15,11 @@
         }
 
         header {
-            padding: 1rem 1.5rem;
+            padding: 2rem 1.5rem 1rem;
             border-bottom: 1px solid #2a6a42;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             background: #143d25;
         }
 
@@ -305,25 +297,9 @@
         .play-btn svg { width: 32px; height: 32px; fill: #fff; margin-left: 4px; }
 
         @media (max-width: 600px) {
-            header { padding: 0.75rem 1rem; gap: 8px; }
-            header h1 { font-size: 11px; letter-spacing: 2px; }
-            header p { display: none; }
-            .kofi-btn { font-size: 10px; padding: 5px 8px; letter-spacing: 0; }
-            .channel-select { font-size: 10px; padding: 5px 6px; }
-
-            main { padding: 1.25rem 0.75rem; }
-            .date-section { margin-bottom: 2rem; }
-            .matches-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .flags { padding: 1.1rem 0.75rem; gap: 8px; }
-            .flags img { width: 44px; height: 33px; }
-            .match-teams { font-size: 11px; }
-
-            /* Modal fills the screen on mobile */
-            .modal-overlay { padding: 0; align-items: flex-end; }
-            .modal-box { border-radius: 12px 12px 0 0; max-width: 100%; }
-            .modal-header { padding: 0.75rem 1rem; }
-            .modal-close { font-size: 20px; padding: 4px 8px; }
-
+            .matches-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .flags { padding: 1.2rem 0.8rem; }
+            .flags img { width: 40px; height: 30px; }
             .title-bar { height: 44px; gap: 10px; }
             .title-bar img { width: 32px; height: 24px; }
         }
@@ -334,7 +310,7 @@
 <header>
     <div>
         <h1>No Spoilers World Cup</h1>
-        <p>World Cup 2026 &mdash; Spoiler-free highlights &mdash; Works in UK, or with a VPN</p>
+        <p>World Cup 2026 &mdash; Spoiler-free highlights</p>
     </div>
     <div class="header-controls">
         <select class="channel-select" id="channel-select" onchange="changeChannel(this.value)">
