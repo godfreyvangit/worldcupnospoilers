@@ -398,17 +398,57 @@
     }
 
     function startVideo() {
-        if (!currentVideoId || starting) return;
+        if (!currentVideoId || starting) return;   // ignore extra clicks
         starting = true;
 
-        const videoId = currentVideoId;
-        document.getElementById('player-container').innerHTML =
-            `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        // Spinner while we load; the black cover stays up so YouTube's
+        // thumbnail (which shows the score) is never visible.
+        document.getElementById('cover-inner').innerHTML = '<div class="spinner"></div>';
+        document.getElementById('player-container').innerHTML = '<div id="yt-player"></div>';
 
-        // Keep cover up briefly so autoplay starts before the thumbnail can show
-        setTimeout(() => {
+        const revealAndUnmute = () => {
             document.getElementById('video-cover').classList.add('hidden');
-        }, 1000);
+            // Started muted so autoplay is allowed everywhere (incl. iOS);
+            // now bring the sound back.
+            if (player) { try { player.unMute(); player.setVolume(100); } catch (e) {} }
+        };
+
+        const make = () => {
+            player = new YT.Player('yt-player', {
+                videoId: currentVideoId,
+                playerVars: {
+                    autoplay: 1, mute: 1, rel: 0,
+                    playsinline: 1, modestbranding: 1
+                },
+                events: {
+                    onReady: (e) => { e.target.mute(); e.target.playVideo(); },
+                    onStateChange: (e) => {
+                        // BUFFERING or PLAYING both mean the thumbnail is gone
+                        if (e.data === YT.PlayerState.PLAYING ||
+                            e.data === YT.PlayerState.BUFFERING) {
+                            revealAndUnmute();
+                        }
+                    },
+                    onError: () => {
+                        // Embedding blocked for this video — fall back to a
+                        // plain iframe so it still plays rather than spinning.
+                        document.getElementById('player-container').innerHTML =
+                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                        document.getElementById('video-cover').classList.add('hidden');
+                    }
+                }
+            });
+            // Safety net: never leave the user staring at a spinner forever.
+            setTimeout(revealAndUnmute, 6000);
+        };
+
+        if (window.YT && window.YT.Player) {
+            make();
+        } else {
+            const wait = setInterval(() => {
+                if (window.YT && window.YT.Player) { clearInterval(wait); make(); }
+            }, 50);
+        }
     }
 
     function openModal(videoId, team1, team2) {
