@@ -245,7 +245,8 @@
         }
 
         .video-wrap iframe,
-        .video-wrap #player-container {
+        .video-wrap #player-container,
+        .video-wrap #yt-player {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -375,6 +376,7 @@
     </div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const FLAGS = {
         "england": "gb-eng", "scotland": "gb-sct", "france": "fr", "germany": "de",
@@ -406,15 +408,37 @@
     }
 
     let currentVideoId = null;
+    let ytApiReady = false;
+    window.onYouTubeIframeAPIReady = () => { ytApiReady = true; };
 
     function startVideo() {
         if (!currentVideoId) return;
-        document.getElementById('video-cover').classList.add('hidden');
-        document.getElementById('player-container').innerHTML =
-            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1"
-                allow="autoplay; encrypted-media" allowfullscreen
-                style="position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:0 0 10px 10px;">
-            </iframe>`;
+        // Keep cover visible while buffering — only hide it when PLAYING fires
+        document.getElementById('player-container').innerHTML = '<div id="yt-player"></div>';
+        const cover = document.getElementById('video-cover');
+
+        const createPlayer = () => {
+            new YT.Player('yt-player', {
+                videoId: currentVideoId,
+                playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
+                events: {
+                    onStateChange: (e) => {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            cover.classList.add('hidden');
+                        }
+                    }
+                }
+            });
+        };
+
+        if (ytApiReady) {
+            createPlayer();
+        } else {
+            // API not ready yet — poll briefly then create
+            const wait = setInterval(() => {
+                if (ytApiReady) { clearInterval(wait); createPlayer(); }
+            }, 50);
+        }
     }
 
     function openModal(videoId, team1, team2) {
