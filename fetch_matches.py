@@ -10,7 +10,7 @@ from datetime import date, timedelta
 CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
-    {"id": "UCwNqHDsnBCKT-olwJwIFyfg", "name": "Fox Sports (USA)", "file": "matches_fox.json"},
+    {"playlist": "PLSoN6Th-EepMUaxmTobuR_SBwVkdkxdfO", "name": "Fox Sports (USA)", "file": "matches_fox.json"},
 ]
 
 # Only search YouTube for videos published in the last N days.
@@ -157,22 +157,36 @@ def check_missing(matches_by_channel):
         print("✅  Both channels have the same set of matches.")
 
 
-def fetch_page(api_key, channel_id, page_token=None):
-    published_after = (date.today() - timedelta(days=LOOKBACK_DAYS)).isoformat()
-    params = {
-        "part": "snippet",
-        "channelId": channel_id,
-        "maxResults": "50",
-        "order": "date",
-        "type": "video",
-        "publishedAfter": f"{published_after}T00:00:00Z",
-        "regionCode": "GB",
-        "key": api_key,
-    }
-    if page_token:
-        params["pageToken"] = page_token
+def fetch_page(api_key, channel, page_token=None):
+    # A channel can be sourced either from a curated playlist or from a
+    # channel-wide search. Playlists are pulled in full (no date window) since
+    # they're already a hand-picked list of highlights.
+    if channel.get("playlist"):
+        params = {
+            "part": "snippet",
+            "playlistId": channel["playlist"],
+            "maxResults": "50",
+            "key": api_key,
+        }
+        if page_token:
+            params["pageToken"] = page_token
+        url = "https://www.googleapis.com/youtube/v3/playlistItems?" + urllib.parse.urlencode(params)
+    else:
+        published_after = (date.today() - timedelta(days=LOOKBACK_DAYS)).isoformat()
+        params = {
+            "part": "snippet",
+            "channelId": channel["id"],
+            "maxResults": "50",
+            "order": "date",
+            "type": "video",
+            "publishedAfter": f"{published_after}T00:00:00Z",
+            "regionCode": "GB",
+            "key": api_key,
+        }
+        if page_token:
+            params["pageToken"] = page_token
+        url = "https://www.googleapis.com/youtube/v3/search?" + urllib.parse.urlencode(params)
 
-    url = "https://www.googleapis.com/youtube/v3/search?" + urllib.parse.urlencode(params)
     with urllib.request.urlopen(url) as r:
         return json.loads(r.read())
 
@@ -184,11 +198,16 @@ def fetch_highlights(api_key, channel):
     page_token = None
 
     while True:
-        data = fetch_page(api_key, channel["id"], page_token)
+        data = fetch_page(api_key, channel, page_token)
 
         for item in data.get("items", []):
-            video_id = item["id"].get("videoId", "")
             snippet = item.get("snippet", {})
+            # Playlist items carry the video id under snippet.resourceId;
+            # search results carry it under id.
+            if channel.get("playlist"):
+                video_id = snippet.get("resourceId", {}).get("videoId", "")
+            else:
+                video_id = item["id"].get("videoId", "")
             title = snippet.get("title", "")
             published = snippet.get("publishedAt", "")[:10]  # YYYY-MM-DD
 
