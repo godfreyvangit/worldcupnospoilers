@@ -11,7 +11,7 @@ CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
     {"playlist": "PLSoN6Th-EepMUaxmTobuR_SBwVkdkxdfO", "name": "Fox Sports (USA)", "file": "matches_fox.json", "allow_extended": True},
-    {"id": "UC--i2rV5NCxiEIPefr3l-zQ", "name": "TSN (Canada)", "file": "matches_tsn.json", "allow_extended": True},
+    {"id": "UC--i2rV5NCxiEIPefr3l-zQ", "name": "TSN (Canada)", "file": "matches_tsn.json", "allow_extended": True, "region": "CA"},
 ]
 
 # Only search YouTube for videos published in the last N days.
@@ -189,7 +189,10 @@ def fetch_page(api_key, channel, page_token=None):
             "order": "date",
             "type": "video",
             "publishedAfter": f"{published_after}T00:00:00Z",
-            "regionCode": "GB",
+            # Search only returns videos viewable in this region. BBC/ITV are
+            # licensed for GB; TSN's highlights are Canada-only, so they need CA
+            # or the API silently drops them.
+            "regionCode": channel.get("region", "GB"),
             "key": api_key,
         }
         if page_token:
