@@ -11,6 +11,7 @@ CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
     {"playlist": "PLSoN6Th-EepMUaxmTobuR_SBwVkdkxdfO", "name": "Fox Sports (USA)", "file": "matches_fox.json", "allow_extended": True},
+    {"id": "UC--i2rV5NCxiEIPefr3l-zQ", "name": "TSN (Canada)", "file": "matches_tsn.json", "allow_extended": True},
 ]
 
 # Only search YouTube for videos published in the last N days.
@@ -71,6 +72,8 @@ EXCLUDE_KEYWORDS = [
     "documentary", "trailer", "q&a", "predict", "analysis", "explained",
     "interview", "build-up", "build up", "vlog", "behind the scenes",
     "reacts", "football daily",
+    # TSN posts pre-game shows and "First 10 Minutes" livestream clips that aren't highlights
+    "pre-game", "pregame", "first 10", "first ten",
 ]
 
 
