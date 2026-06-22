@@ -33,6 +33,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add matches_bbc.json matches_itv.json
+          git add matches_bbc.json matches_itv.json matches_fox.json
           git diff --staged --quiet || git commit -m "Update matches"
           git push

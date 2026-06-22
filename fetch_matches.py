@@ -10,6 +10,7 @@ from datetime import date, timedelta
 CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
+    {"id": "UCwNqHDsnBCKT-olwJwIFyfg", "name": "Fox Sports (USA)", "file": "matches_fox.json"},
 ]
 
 # Only search YouTube for videos published in the last N days.
