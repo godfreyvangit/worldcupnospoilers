@@ -10,7 +10,7 @@ from datetime import date, timedelta
 CHANNELS = [
     {"id": "UCli0KmmXMDjcgqvsheHfv-Q", "name": "BBC Football", "file": "matches_bbc.json"},
     {"id": "UCBzDz6beXDfMtfxQdEutD_w", "name": "ITV Sport", "file": "matches_itv.json"},
-    {"playlist": "PLSoN6Th-EepMUaxmTobuR_SBwVkdkxdfO", "name": "Fox Sports (USA)", "file": "matches_fox.json"},
+    {"playlist": "PLSoN6Th-EepMUaxmTobuR_SBwVkdkxdfO", "name": "Fox Sports (USA)", "file": "matches_fox.json", "allow_extended": True},
 ]
 
 # Only search YouTube for videos published in the last N days.
@@ -74,7 +74,7 @@ EXCLUDE_KEYWORDS = [
 ]
 
 
-def is_highlight(title):
+def is_highlight(title, allow_extended=False):
     t = title.lower()
     # Channels vary the word order: BBC "2026 FIFA World Cup",
     # FIFA "FIFA World Cup 2026". Match on the stable parts. We do NOT require the
@@ -83,9 +83,15 @@ def is_highlight(title):
     # against non-match clips instead.
     if "world cup" not in t or "2026" not in t:
         return False
+    # Some channels (e.g. Fox Sports) title their highlight packages "Extended
+    # Highlights", so "extended" must not exclude them there. BBC/ITV keep the
+    # default behaviour.
+    keywords = EXCLUDE_KEYWORDS
+    if allow_extended:
+        keywords = [kw for kw in EXCLUDE_KEYWORDS if kw != "extended"]
     # Whole-word match so short keywords like "live" don't trip on "deliver",
     # "Oliver", "alive", etc.
-    return not any(re.search(r"\b" + re.escape(kw) + r"\b", t) for kw in EXCLUDE_KEYWORDS)
+    return not any(re.search(r"\b" + re.escape(kw) + r"\b", t) for kw in keywords)
 
 
 def extract_teams(title):
@@ -213,7 +219,7 @@ def fetch_highlights(api_key, channel):
 
             print(f"TITLE: {title}")
 
-            if not is_highlight(title):
+            if not is_highlight(title, channel.get("allow_extended", False)):
                 print("SKIPPED")
                 print("---")
                 continue
@@ -276,7 +282,7 @@ def main():
                 matches.append(v)
 
         # Strip any non-highlight entries that slipped in from previous runs
-        matches = [m for m in matches if is_highlight(m["title"])]
+        matches = [m for m in matches if is_highlight(m["title"], channel.get("allow_extended", False))]
 
         matches.sort(key=lambda x: x["date"] or "", reverse=True)
 
