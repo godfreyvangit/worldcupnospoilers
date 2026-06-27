@@ -271,6 +271,26 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
+        /* In fullscreen we fullscreen the wrapper (not the bare iframe) so the
+           green title-bar still covers YouTube's title. These rules only apply
+           while fullscreen is active. */
+        .video-wrap:fullscreen,
+        .video-wrap:-webkit-full-screen {
+            padding-bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .video-wrap:fullscreen .title-bar,
+        .video-wrap:-webkit-full-screen .title-bar {
+            height: 80px;
+        }
+        .video-wrap:fullscreen .title-bar img,
+        .video-wrap:-webkit-full-screen .title-bar img {
+            width: 52px;
+            height: 39px;
+        }
+
         /* Opaque cover hides the thumbnail until the user clicks play */
         .video-cover {
             position: absolute;
@@ -410,6 +430,23 @@
     let currentVideoId = null;
     let player = null;
     let starting = false;
+
+    // Desktop: YouTube's native fullscreen button puts the <iframe> itself into
+    // the fullscreen layer, so our title-bar (a sibling overlay) stops covering
+    // the title and the score-revealing title reappears. Re-request fullscreen
+    // on the wrapper, which contains the title-bar, so the bar stays on top.
+    function enforceWrapFullscreen() {
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!fsEl) return;
+        const wrap = document.querySelector('.video-wrap');
+        if (!wrap || fsEl === wrap) return;
+        if (wrap.contains(fsEl)) {
+            if (wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
+            else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+        }
+    }
+    document.addEventListener('fullscreenchange', enforceWrapFullscreen);
+    document.addEventListener('webkitfullscreenchange', enforceWrapFullscreen);
 
     function setCoverPlay() {
         document.getElementById('cover-inner').innerHTML =
