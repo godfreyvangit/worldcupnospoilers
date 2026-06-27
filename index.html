@@ -291,6 +291,28 @@
             height: 39px;
         }
 
+        /* Our own fullscreen button (YouTube's is disabled via fs:0), sits in
+           the top-right of the green bar so it never overlaps YouTube's own
+           controls along the bottom. */
+        .fs-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            z-index: 30;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fs-btn svg { width: 22px; height: 22px; fill: #fff; opacity: 0.8; }
+        .fs-btn:hover svg { opacity: 1; }
+        .video-wrap:fullscreen .fs-btn,
+        .video-wrap:-webkit-full-screen .fs-btn { height: 80px; }
+
         /* Opaque cover hides the thumbnail until the user clicks play */
         .video-cover {
             position: absolute;
@@ -351,6 +373,8 @@
             .flags img { width: 40px; height: 30px; }
             .title-bar { height: 44px; gap: 10px; }
             .title-bar img { width: 32px; height: 24px; }
+            .fs-btn { height: 44px; width: 48px; }
+            .fs-btn svg { width: 20px; height: 20px; }
         }
     </style>
 </head>
@@ -385,6 +409,9 @@
         <div class="video-wrap">
             <div id="player-container"></div>
             <div class="title-bar" id="title-bar"></div>
+            <button class="fs-btn" id="fs-btn" title="Fullscreen" onclick="toggleFullscreen()">
+                <svg viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3H4zm0 6h2v3h3v2H4v-5zm16 0v5h-5v-2h3v-3h2zm0-6h-2V6h-3V4h5v5z"/></svg>
+            </button>
             <div class="video-cover" id="video-cover" onclick="startVideo()">
                 <div id="cover-inner">
                     <div class="play-btn">
@@ -431,22 +458,22 @@
     let player = null;
     let starting = false;
 
-    // Desktop: YouTube's native fullscreen button puts the <iframe> itself into
-    // the fullscreen layer, so our title-bar (a sibling overlay) stops covering
-    // the title and the score-revealing title reappears. Re-request fullscreen
-    // on the wrapper, which contains the title-bar, so the bar stays on top.
-    function enforceWrapFullscreen() {
-        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!fsEl) return;
+    // Fullscreen the wrapper (which holds the title-bar) rather than the bare
+    // YouTube iframe, so the green bar keeps covering the score-revealing title.
+    // YouTube's own fullscreen button is disabled (fs:0); this runs from a real
+    // click on our button, so the browser grants the fullscreen request.
+    function toggleFullscreen() {
         const wrap = document.querySelector('.video-wrap');
-        if (!wrap || fsEl === wrap) return;
-        if (wrap.contains(fsEl)) {
+        if (!wrap) return;
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        if (fsEl) {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        } else {
             if (wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
             else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
         }
     }
-    document.addEventListener('fullscreenchange', enforceWrapFullscreen);
-    document.addEventListener('webkitfullscreenchange', enforceWrapFullscreen);
 
     function setCoverPlay() {
         document.getElementById('cover-inner').innerHTML =
@@ -474,7 +501,10 @@
                 videoId: currentVideoId,
                 playerVars: {
                     autoplay: 1, mute: 1, rel: 0,
-                    playsinline: 1, modestbranding: 1
+                    playsinline: 1, modestbranding: 1,
+                    // Disable YouTube's own fullscreen so we can fullscreen the
+                    // wrapper (with the title-bar) via our own button instead.
+                    fs: 0
                 },
                 events: {
                     onReady: (e) => { e.target.mute(); e.target.playVideo(); },
@@ -489,7 +519,7 @@
                         // Embedding blocked for this video — fall back to a
                         // plain iframe so it still plays rather than spinning.
                         document.getElementById('player-container').innerHTML =
-                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1&fs=0" allow="autoplay; encrypted-media"></iframe>`;
                         document.getElementById('video-cover').classList.add('hidden');
                     }
                 }
