@@ -313,6 +313,12 @@
         .video-wrap:fullscreen .fs-btn,
         .video-wrap:-webkit-full-screen .fs-btn { height: 80px; }
 
+        /* On touch devices we use YouTube's native fullscreen instead, so hide
+           our custom button there. */
+        @media (pointer: coarse) {
+            .fs-btn { display: none; }
+        }
+
         /* Opaque cover hides the thumbnail until the user clicks play */
         .video-cover {
             position: absolute;
@@ -373,8 +379,6 @@
             .flags img { width: 40px; height: 30px; }
             .title-bar { height: 44px; gap: 10px; }
             .title-bar img { width: 32px; height: 24px; }
-            .fs-btn { height: 44px; width: 48px; }
-            .fs-btn svg { width: 20px; height: 20px; }
         }
     </style>
 </head>
@@ -458,6 +462,12 @@
     let player = null;
     let starting = false;
 
+    // On mobile (touch devices) the Fullscreen API can't fullscreen a <div>,
+    // and YouTube's native fullscreen hides the title anyway, so we let YouTube
+    // handle fullscreen there. On desktop we use our own button + fs:0 so the
+    // title-bar keeps covering the title.
+    const IS_MOBILE = window.matchMedia('(pointer: coarse)').matches;
+
     // Fullscreen the wrapper (which holds the title-bar) rather than the bare
     // YouTube iframe, so the green bar keeps covering the score-revealing title.
     // YouTube's own fullscreen button is disabled (fs:0); this runs from a real
@@ -502,9 +512,10 @@
                 playerVars: {
                     autoplay: 1, mute: 1, rel: 0,
                     playsinline: 1, modestbranding: 1,
-                    // Disable YouTube's own fullscreen so we can fullscreen the
-                    // wrapper (with the title-bar) via our own button instead.
-                    fs: 0
+                    // Desktop: disable YouTube's fullscreen so our button can
+                    // fullscreen the wrapper (with the title-bar). Mobile: keep
+                    // YouTube's native fullscreen (it hides the title itself).
+                    fs: IS_MOBILE ? 1 : 0
                 },
                 events: {
                     onReady: (e) => { e.target.mute(); e.target.playVideo(); },
@@ -519,7 +530,7 @@
                         // Embedding blocked for this video — fall back to a
                         // plain iframe so it still plays rather than spinning.
                         document.getElementById('player-container').innerHTML =
-                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1&fs=0" allow="autoplay; encrypted-media"></iframe>`;
+                            `<iframe src="https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&playsinline=1&fs=${IS_MOBILE ? 1 : 0}" allow="autoplay; encrypted-media"${IS_MOBILE ? ' allowfullscreen' : ''}></iframe>`;
                         document.getElementById('video-cover').classList.add('hidden');
                     }
                 }
