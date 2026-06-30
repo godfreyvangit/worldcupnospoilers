@@ -1,9 +1,25 @@
 [
   {
+    "videoId": "DkZtwwbN1YI",
+    "title": "Netherlands vs Morocco Highlights \ud83c\udf0e\ud83c\udfc6 2026 FIFA World Cup\u2122 | Round of 32",
+    "team1": "Netherlands",
+    "team2": "Morocco",
+    "date": "2026-06-30",
+    "channel": "Fox Sports (USA)"
+  },
+  {
     "videoId": "QgUSOlN0Tt0",
     "title": "Brazil vs Japan Highlights \ud83c\udf0e\ud83c\udfc6 2026 FIFA World Cup\u2122 | Round of 32",
     "team1": "Brazil",
     "team2": "Japan",
+    "date": "2026-06-29",
+    "channel": "Fox Sports (USA)"
+  },
+  {
+    "videoId": "-gtI96YhJek",
+    "title": "Germany vs Paraguay Highlights \ud83c\udf0e\ud83c\udfc6 2026 FIFA World Cup\u2122 | Round of 32",
+    "team1": "Germany",
+    "team2": "Paraguay",
     "date": "2026-06-29",
     "channel": "Fox Sports (USA)"
   },
