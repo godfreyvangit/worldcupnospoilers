@@ -285,16 +285,20 @@ def main():
             with open(channel["file"]) as f:
                 existing = json.load(f)
 
+        allow_extended = channel.get("allow_extended", False)
         seen = set()
         matches = []
         for v in existing + videos:
+            # Filter BEFORE dedup: otherwise a non-highlight (e.g. a pens-only
+            # clip that was saved before the filter existed) can win the dedup
+            # slot for a match and crowd out the real highlights, which then
+            # vanish entirely when the non-highlight is stripped.
+            if not is_highlight(v["title"], allow_extended):
+                continue
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
                 seen.add(key)
                 matches.append(v)
-
-        # Strip any non-highlight entries that slipped in from previous runs
-        matches = [m for m in matches if is_highlight(m["title"], channel.get("allow_extended", False))]
 
         matches.sort(key=lambda x: x["date"] or "", reverse=True)
 
