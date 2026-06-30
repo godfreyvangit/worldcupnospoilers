@@ -82,6 +82,15 @@ EXCLUDE_KEYWORDS = [
     "shootout", "shoot-out", "shoot out", "pens only", "penalties only",
 ]
 
+# Knockout-stage markers. Channels (e.g. ITV) sometimes drop "2026" from
+# knockout titles ("... | All Action Knockout Match! | FIFA World Cup"), so we
+# accept "FIFA World Cup" + one of these as a 2026 stand-in.
+KNOCKOUT_MARKERS = [
+    "round of", "last 16", "last 32", "knockout",
+    "quarter-final", "quarter final", "quarterfinal",
+    "semi-final", "semi final", "semifinal", "final",
+]
+
 
 def is_highlight(title, allow_extended=False):
     t = title.lower()
@@ -90,7 +99,10 @@ def is_highlight(title, allow_extended=False):
     # word "highlights" because BBC occasionally omits it (e.g. "Team v Team |
     # 2026 FIFA World Cup | Group A"); team extraction + EXCLUDE_KEYWORDS guard
     # against non-match clips instead.
-    if "world cup" not in t or "2026" not in t:
+    if "world cup" not in t:
+        return False
+    # Normally require "2026", but accept knockout titles that omit it.
+    if "2026" not in t and not any(m in t for m in KNOCKOUT_MARKERS):
         return False
     # Some channels (e.g. Fox Sports) title their highlight packages "Extended
     # Highlights", so "extended" must not exclude them there. BBC/ITV keep the
@@ -286,7 +298,7 @@ def main():
                 existing = json.load(f)
 
         allow_extended = channel.get("allow_extended", False)
-        seen = set()
+        seen = {}  # match key -> index in matches
         matches = []
         for v in existing + videos:
             # Filter BEFORE dedup: otherwise a non-highlight (e.g. a pens-only
@@ -297,8 +309,15 @@ def main():
                 continue
             key = f"{v['team1'].lower()}_{v['team2'].lower()}_{v['date']}"
             if key not in seen:
-                seen.add(key)
+                seen[key] = len(matches)
                 matches.append(v)
+            else:
+                # Same match already kept. Prefer a proper "highlights" video
+                # over a single-goal/moment clip (e.g. "X Scores Opener ...").
+                idx = seen[key]
+                kept = matches[idx]
+                if "highlight" in v["title"].lower() and "highlight" not in kept["title"].lower():
+                    matches[idx] = v
 
         matches.sort(key=lambda x: x["date"] or "", reverse=True)
 
