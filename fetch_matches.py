@@ -74,6 +74,12 @@ EXCLUDE_KEYWORDS = [
     "reacts", "football daily",
     # TSN posts pre-game shows and "First 10 Minutes" livestream clips that aren't highlights
     "pre-game", "pregame", "first 10", "first ten",
+    # Knockout games get a separate penalties-only clip as well as the full
+    # highlights (which already include the shootout). Drop the pens-only one.
+    # "shootout"/"shoot-out" only appears in those clips; full highlights are
+    # titled "Highlights"/"Full Highlights" and never contain it. We avoid the
+    # bare word "penalties" because a full-highlights title may say "on penalties".
+    "shootout", "shoot-out", "shoot out", "pens only", "penalties only",
 ]
 
 
