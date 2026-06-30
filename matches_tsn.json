@@ -1,9 +1,33 @@
 [
   {
+    "videoId": "IVIGSA6N1e8",
+    "title": "Netherlands vs. Morocco | FIFA World Cup 2026 | GAME IN 30",
+    "team1": "Netherlands",
+    "team2": "Morocco",
+    "date": "2026-06-30",
+    "channel": "TSN (Canada)"
+  },
+  {
+    "videoId": "7Zst7Bjhe1U",
+    "title": "Germany vs. Paraguay | FIFA World Cup 2026 | GAME IN 30",
+    "team1": "Germany",
+    "team2": "Paraguay",
+    "date": "2026-06-30",
+    "channel": "TSN (Canada)"
+  },
+  {
     "videoId": "oD-LbS3Qpr0",
     "title": "Brazil vs. Japan | FIFA World Cup 2026 | GAME IN 30",
     "team1": "Brazil",
     "team2": "Japan",
+    "date": "2026-06-29",
+    "channel": "TSN (Canada)"
+  },
+  {
+    "videoId": "sUSRb-I2Q_g",
+    "title": "Germany vs. Paraguay Full Highlights | FIFA World Cup 2026",
+    "team1": "Germany",
+    "team2": "Paraguay",
     "date": "2026-06-29",
     "channel": "TSN (Canada)"
   },
