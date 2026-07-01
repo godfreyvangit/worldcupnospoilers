@@ -1,5 +1,13 @@
 [
   {
+    "videoId": "wAkBKV1u8Zs",
+    "title": "Mexico v Ecuador \ud83c\uddf2\ud83c\uddfd\ud83c\uddea\ud83c\udde8 | 2026 FIFA World Cup Highlights | Round of 32",
+    "team1": "Mexico",
+    "team2": "Ecuador",
+    "date": "2026-07-01",
+    "channel": "BBC Football"
+  },
+  {
     "videoId": "SR1vjyqXLwU",
     "title": "Netherlands 1-1 (2-3) Morocco \ud83c\uddf3\ud83c\uddf1 \ud83c\uddf2\ud83c\udde6 | 2026 FIFA World Cup Highlights | Round of 32",
     "team1": "Netherlands",
@@ -20,6 +28,14 @@
     "title": "Ivory Coast v Norway \ud83c\udde8\ud83c\uddee\ud83c\uddf3\ud83c\uddf4 | 2026 FIFA World Cup Highlights | Round of 32",
     "team1": "Ivory Coast",
     "team2": "Norway",
+    "date": "2026-06-30",
+    "channel": "BBC Football"
+  },
+  {
+    "videoId": "D9K1xdAIwfg",
+    "title": "France v Sweden \ud83c\uddeb\ud83c\uddf7\ud83c\uddf8\ud83c\uddea | 2026 FIFA World Cup Highlights | Round of 32",
+    "team1": "France",
+    "team2": "Sweden",
     "date": "2026-06-30",
     "channel": "BBC Football"
   },

@@ -1,5 +1,13 @@
 [
   {
+    "videoId": "NBd4gIaCag4",
+    "title": "Mexico vs. Ecuador Full Highlights | FIFA World Cup 2026",
+    "team1": "Mexico",
+    "team2": "Ecuador",
+    "date": "2026-07-01",
+    "channel": "TSN (Canada)"
+  },
+  {
     "videoId": "rql8_f5j5XQ",
     "title": "Netherlands vs. Morocco Full Highlights | FIFA World Cup 2026",
     "team1": "Netherlands",
@@ -12,6 +20,14 @@
     "title": "Germany vs. Paraguay | FIFA World Cup 2026 | GAME IN 30",
     "team1": "Germany",
     "team2": "Paraguay",
+    "date": "2026-06-30",
+    "channel": "TSN (Canada)"
+  },
+  {
+    "videoId": "ycEvQreD7ps",
+    "title": "France vs. Sweden Full Highlights | FIFA World Cup 2026",
+    "team1": "France",
+    "team2": "Sweden",
     "date": "2026-06-30",
     "channel": "TSN (Canada)"
   },
