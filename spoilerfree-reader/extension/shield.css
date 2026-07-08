@@ -1,0 +1,41 @@
+/* Spoiler Shield: blank out every score-bearing element on watch pages. */
+
+/* Video title (desktop + mobile) */
+#title h1,
+ytd-watch-metadata #title,
+.slim-video-information-title {
+	visibility: hidden !important;
+}
+
+/* Related videos rail / up-next */
+#secondary,
+#related,
+ytm-item-section-renderer[section-identifier='related-items'] {
+	display: none !important;
+}
+
+/* Comments (often contain the score) */
+#comments,
+ytm-comment-section-renderer {
+	display: none !important;
+}
+
+/* End screen: suggested-video wall and end cards */
+.ytp-endscreen-content,
+.ytp-ce-element,
+.ytp-cards-teaser {
+	display: none !important;
+}
+
+/* Seekbar hover preview thumbnails (can show late-game frames) */
+.ytp-tooltip.ytp-preview,
+.ytp-tooltip-bg {
+	visibility: hidden !important;
+}
+
+/* Autoplay-next toggle preview */
+.ytp-autonav-endscreen-upnext-container {
+	display: none !important;
+}
+
+/* Browser tab title is handled by shield.js */
