@@ -1,0 +1,19 @@
+{
+	"manifest_version": 3,
+	"name": "Spoiler Shield for YouTube",
+	"version": "0.1.0",
+	"description": "Hides video titles, related videos, comments and end screens on YouTube watch pages so scores are never spoiled.",
+	"content_scripts": [
+		{
+			"matches": ["*://www.youtube.com/watch*", "*://m.youtube.com/watch*"],
+			"css": ["shield.css"],
+			"js": ["shield.js"],
+			"run_at": "document_start"
+		},
+		{
+			"matches": ["*://localhost/*", "*://*.vercel.app/*", "*://*.netlify.app/*"],
+			"js": ["marker.js"],
+			"run_at": "document_start"
+		}
+	]
+}
