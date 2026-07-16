@@ -345,58 +345,74 @@ class IndustryIndex:
 # --------------------------------------------------------------------------------------
 
 def load_cas_list(path):
-    """Load CAS numbers from a .txt (one per line) or .csv (auto-detect CAS column).
+    """Load CAS numbers, returning a list of (raw_cas, passthrough) pairs.
 
-    Preserves the original strings so the output echoes exactly what the user supplied.
+    A .txt is one CAS per line (`#` comments allowed), with no passthrough data.
+    A .csv/.xlsx auto-detects the CAS column and carries every other column through as
+    passthrough, so a "Component, CAS" spreadsheet keeps its component names in the output.
     """
     lower = path.lower()
-    originals = []
+    items = []
     if lower.endswith((".csv", ".tsv", ".xlsx", ".xlsm")):
         rows = read_rows(path)
         if not rows:
-            return originals
+            return items
         hidx = detect_header_row(rows)
-        headers = rows[hidx]
+        headers = [h if str(h).strip() else "column_{}".format(i)
+                   for i, h in enumerate(rows[hidx])]
         cas_i = find_column(headers, CAS_ALIASES)
         if cas_i is None:
-            cas_i = 0  # assume first column
-            start = hidx  # no recognisable header; treat every row as data
+            cas_i = 0  # no recognisable CAS header; assume the first column
+            start = hidx  # ...and treat every row (including this one) as data
         else:
             start = hidx + 1
         for row in rows[start:]:
-            if cas_i < len(row) and str(row[cas_i]).strip():
-                originals.append(str(row[cas_i]).strip())
+            raw = str(row[cas_i]).strip() if cas_i < len(row) else ""
+            passthrough = OrderedDict()
+            for i, name in enumerate(headers):
+                if i == cas_i:
+                    continue  # the CAS itself is echoed separately as cas_input
+                passthrough[name] = row[i].strip() if i < len(row) else ""
+            if raw or any(passthrough.values()):
+                items.append((raw, passthrough))
     else:
         for enc in ("utf-8-sig", "utf-8", "latin-1"):
             try:
                 with open(path, "r", encoding=enc) as fh:
+                    items = []
                     for line in fh:
                         line = line.strip()
                         if not line or line.startswith("#"):
                             continue
-                        originals.append(line)
+                        items.append((line, OrderedDict()))
                 break
             except UnicodeDecodeError:
-                originals = []
+                items = []
                 continue
-    return originals
+    return items
 
 
 # --------------------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------------------
 
-def build_output_rows(cas_inputs, harmonised, industry):
-    """Join the requested CAS numbers against both indexes into ordered dict rows."""
+def build_output_rows(items, passthrough_columns, harmonised, industry):
+    """Join the requested CAS numbers against both indexes into ordered dict rows.
+
+    `items` is a list of (raw_cas, passthrough_dict); `passthrough_columns` is the ordered
+    union of passthrough keys, so every row carries the same columns (e.g. a Component name).
+    """
     industry_cols = industry.out_columns if industry else []
     out_rows = []
     stats = {"total": 0, "harmonised": 0, "industry": 0, "invalid": 0, "no_cas": 0}
 
     seen = set()
-    for original in cas_inputs:
+    for original, passthrough in items:
         cas = canonical_cas(original)
         stats["total"] += 1
         row = OrderedDict()
+        for col in passthrough_columns:
+            row[col] = passthrough.get(col, "")
         row["cas_input"] = original
         row["cas_number"] = cas
 
@@ -496,13 +512,21 @@ def main(argv=None):
     if not args.harmonised and not args.industry:
         raise SystemExit("ERROR: provide at least one source: --harmonised and/or --industry.")
 
-    cas_inputs = []
+    items = []
     if args.cas:
-        cas_inputs.extend(args.cas)
+        items.extend((c, OrderedDict()) for c in args.cas)
     if args.cas_list:
-        cas_inputs.extend(load_cas_list(args.cas_list))
-    if not cas_inputs:
+        items.extend(load_cas_list(args.cas_list))
+    if not items:
         raise SystemExit("ERROR: no CAS numbers found in the provided input.")
+
+    # Ordered union of passthrough columns from the input file (e.g. a Component name),
+    # so every output row carries the same leading columns.
+    passthrough_columns = []
+    for _, passthrough in items:
+        for key in passthrough:
+            if key not in passthrough_columns:
+                passthrough_columns.append(key)
 
     harmonised = None
     if args.harmonised:
@@ -524,7 +548,7 @@ def main(argv=None):
             print("    note: {} CAS number(s) had multiple export rows; kept the first of each."
                   .format(len(industry.duplicate_cas)), file=sys.stderr)
 
-    rows, stats = build_output_rows(cas_inputs, harmonised, industry)
+    rows, stats = build_output_rows(items, passthrough_columns, harmonised, industry)
     write_csv(args.output, rows)
 
     print("\n=== Summary ===", file=sys.stderr)

@@ -124,6 +124,26 @@ class EndToEnd(unittest.TestCase):
         bad = by_input["71-43-3"]
         self.assertEqual(bad["cas_valid"], "no")
 
+    def test_components_passthrough(self):
+        # A "Component, CAS, Supplier" spreadsheet keeps its own columns in the output.
+        out = os.path.join(tempfile.mkdtemp(), "out.csv")
+        ec.main([
+            "--cas-list", os.path.join(FIX, "components.csv"),
+            "--harmonised", HARMONISED,
+            "--industry", INDUSTRY,
+            "--output", out,
+        ])
+        with open(out, encoding="utf-8-sig") as fh:
+            rows = list(csv.DictReader(fh))
+        header = rows[0].keys()
+        self.assertIn("Component", header)
+        self.assertIn("Supplier", header)
+        by_comp = {r["Component"]: r for r in rows}
+        self.assertEqual(by_comp["Benzene solvent"]["cas_number"], "71-43-2")
+        self.assertEqual(by_comp["Benzene solvent"]["harmonised_found"], "yes")
+        self.assertEqual(by_comp["Benzene solvent"]["Supplier"], "Acme")
+        self.assertEqual(by_comp["Ethanol denatured"]["industry_found"], "yes")
+
     def test_harmonised_only(self):
         out = os.path.join(tempfile.mkdtemp(), "out.csv")
         ec.main(["--cas", "71-43-2", "--harmonised", HARMONISED, "--output", out])

@@ -67,6 +67,10 @@ python echa_classifications.py --cas-list my_cas.txt --industry echa_chem_export
 - `--cas 71-43-2 50-00-0 ...` — CAS numbers directly.
 - `--cas-list FILE` — a `.txt` (one CAS per line; `#` comments allowed) **or** a
   `.csv`/`.xlsx` whose CAS column is auto-detected.
+- **Component lists carry through.** If `--cas-list` is a spreadsheet like
+  `Component, CAS Number, Supplier`, the CAS column is detected automatically and **all your
+  other columns (component name, supplier, …) are kept as the leading columns of the output**,
+  so each result row stays tied to its component.
 - CAS numbers are normalised (`0000050-00-0` → `50-00-0`) and check-digit–validated;
   suspected typos are flagged in the `cas_valid` column but still looked up.
 
