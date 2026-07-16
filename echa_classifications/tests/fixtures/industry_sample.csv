@@ -1,0 +1,5 @@
+Substance name;EC / List no;CAS no;Hazard Class and Category;Hazard statements;Signal word;Number of notifiers
+benzene;200-753-7;71-43-2;"Flam. Liq. 2; Carc. 1A; Skin Irrit. 2";"H225; H350; H315";Danger;1875
+benzene (duplicate notification group);200-753-7;71-43-2;Flam. Liq. 2;H225;Danger;12
+formaldehyde;200-001-8;50-00-0;"Carc. 1B; Acute Tox. 3";"H350; H301";Danger;2410
+ethanol;200-578-6;64-17-5;"Flam. Liq. 2; Eye Irrit. 2";"H225; H319";Danger;9004

@@ -1,0 +1,2 @@
+# Only needed if your ECHA source files are .xlsx (not required for .csv inputs).
+openpyxl>=3.0
