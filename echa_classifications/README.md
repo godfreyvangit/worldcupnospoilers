@@ -114,12 +114,61 @@ at the end.
 - This tool does not access ECHA over the network — it only reads the files you download,
   so it can't be broken by ECHA's bot-protection and won't hammer their servers.
 
+## Fully automated option: the scraper (`echa_scraper.py`)
+
+If you'd rather not do the manual export, `echa_scraper.py` runs your CAS list against
+the ECHA CHEM website directly by driving a **real Chromium browser** (Playwright) — the
+only approach with a realistic chance against the portal's bot-protection, since ECHA
+offers no public API.
+
+Instead of parsing the rendered HTML (fragile), it **captures the JSON responses the
+portal's own JavaScript fetches** while navigating each substance's search result,
+harmonised section, and C&L Inventory section, and mines the classification fields out
+of those payloads. It writes the CSV incrementally, supports `--resume`, and can dump
+the raw captures per CAS for debugging.
+
+```bash
+pip install playwright
+playwright install chromium
+
+# trial run: first 3 substances, visible browser, raw dumps kept
+python echa_scraper.py --cas-list components.csv --limit 3 --headed --dump-dir dumps -o scraped.csv
+
+# full run
+python echa_scraper.py --cas-list components.csv -o scraped.csv --resume
+```
+
+Useful flags: `--delay` (default 3 s between substances — stay polite), `--timeout`,
+`--retries`, `--headed` (show the browser; also try this if headless gets blocked),
+`--limit N` (trial run), `--resume` (skip CAS already scraped), `--dump-dir DIR`.
+
+**Honest caveats:**
+- This was developed and end-to-end tested against a *local mock* of an ECHA-CHEM-style
+  site (see `tests/test_scraper.py`) because the development environment cannot reach
+  ECHA. The navigation heuristics (search box, result links, section paths) are
+  best-effort guesses at the live portal — expect to calibrate on first run.
+- **First-run protocol:** run with `--limit 3 --headed --dump-dir dumps`. If a column is
+  empty or wrong, look at `dumps/<cas>.json` (the raw JSON the portal returned) — the
+  data is almost certainly in there, and the mining patterns in `MINE_FIELDS` /
+  navigation constants at the top of the file are the knobs to adjust.
+- Scraping can break whenever ECHA changes the portal. For anything compliance-critical,
+  cross-check against the authoritative Annex VI table / the portal itself.
+- Be polite: keep the default delay, run lists of hundreds (not the whole inventory),
+  and prefer the export workflow when it's practical.
+
+The scraper's output is one row per CAS with `harmonised_*` and `industry_*` columns
+(plus your component-list columns carried through), so it plays the same role as the
+merge tool's output.
+
 ## Tests
 
 ```bash
-python tests/test_echa_classifications.py
+python tests/test_echa_classifications.py   # merge tool (offline fixtures)
+python tests/test_scraper.py                # scraper: unit tests + mock-site e2e
 ```
 
-Runs offline against small fixtures under `tests/fixtures/` that mimic the real files'
-quirks (title rows above the header, duplicate "Hazard statement code(s)" columns,
-semicolon-delimited European CSV, leading-zero CAS numbers).
+The merge-tool tests run offline against small fixtures under `tests/fixtures/` that
+mimic the real files' quirks (title rows above the header, duplicate "Hazard statement
+code(s)" columns, semicolon-delimited European CSV, leading-zero CAS numbers). The
+scraper test spins up a local mock ECHA-CHEM-style site and drives the full scraper
+against it in a real Chromium (skipped if Playwright isn't installed).
